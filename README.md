@@ -30,7 +30,9 @@ architecture consists of three different components.
   the models and data of the program. They could be `Book`s in a
   library or `Employee` in an employee registry.
 
-* **Boundaries** are abstractions for transferring data from the outside world to actual business logic side. Succintly put, boundaries are *delivery mechanisms*. bA boundary can implement a graphical user interface of an application or its HTTP API. Boundaries aren't usually concrete implementations but usually defined as abstractions that *interactors* implement.
+* **Boundaries** are abstractions for transferring data from the outside world to actual business logic side. Succintly put, boundaries are *delivery mechanisms*. A boundary can implement a graphical user interface of an application or its HTTP API. Boundaries aren't usually concrete implementations but usually defined as abstractions that *interactors* implement.
+	* **Request boundaries** are endpoints interactors implement tasked with receiving data, e.g., web requests.
+	* **Response boundaries** are where interactors send their results.
 
 * **Interactors** manipulate entities. Their job is to accept requests through the boundaries and manipulate application state. Interactors is the business logic layer of the application: interactors *act* on requests and decide what to do with them. Interactors know of request and response models called **DTOs**, data transfer objects. Any interactor function is a mapping from a request DTO to a response DTO.
 
@@ -64,10 +66,12 @@ The interactor `GetGopher` then can be seen as a mapping of `GetGopherRequest`s 
 
 Furthermore, it is good practice to separate the EBI architecture itself into its own *service* layer, and provide a wrapping around that in the API layer. The API layer functionalities would commonly be registered to different HTTP verbs or user interactions in a GUI application, but still speak in the clean data language of DTOs. In summary, the API layer:
 
-* contains **response boundaries** the interactors can send results to
-* contains **request boundaries** that are services interactors can implement
+* contains **response boundaries** the interactors send results
+* contains **request boundaries** interactors can implement
 * translates data from the outside world into request and response DTOs,
 * is not dependent of any protocol, only data formats (JSON, XML),
 * is unit testable with simple DTOs.
 
 The **service** layer then implements the **request boundary** that receives requests and manipulates entity data. The manipulation can occur in a variety of ways, but any database should be abstracted via some delivery mechanism in a gateway, viz., databases and other web services interactors rely on.
+
+![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
