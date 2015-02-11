@@ -1,4 +1,4 @@
-# Entity&ndash;Boundary&ndash;Interactor: A modern application architecture
+## Entity&ndash;Boundary&ndash;Interactor: A modern application architecture
 
 This repository contains implementation examples of the **Entity-Boundary-Interactor**
 (**EBI**) application architecture as presented by Uncle Bob in his
@@ -48,6 +48,27 @@ Internally, interactors interact with other services through gateways.
 
 * **Gateways** are boundaries not part of the delivery interface that interactors depend upon for their program logic. These are useful for abstracting external interfaces. A database layer or a webservice are abstracted behind boundaries, and they behave exactly like other boundaries. The only difference is in exposure: boundaries are usually visible to the outside world, but gateways are completely inaccessible via the API.
 
+What does a program using this architecture look like?
+
+# Module Hierarchy
+
+![Organization](https://dl.dropboxusercontent.com/u/11213781/ebi/hierarchy.png)
+
+Furthermore, it is good practice to separate the EBI architecture itself into five different layers. These layers correspond to namespaces or packages in your language of choice.
+
+* The **Host** layer implements a physical manifestation of the API, e.g., a web server
+* The **API** layer is the interface to the program itself, which accepts input and translates it into DTOs, passing them to 
+* The **Boundary** layer which is an **abstract** interface between interactors and the API, the boundary layer is concretely is implemented by 
+* The **Service** layer which receives information from and delivers results to the boundary, containing the main program logic which manipulates 
+* The **Entity** layer which contains dumb objects that represent program models and data
+
+Thus, when a program is constructed, the API is given 
+
+* A set of boundaries it needs to talk to
+* A set of interactors that implement these functionalities
+
+![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
+
 # Request and Response Lifecycle for Interactors
 
 ![Request lifecycle](https://dl.dropboxusercontent.com/u/11213781/ebi/lifecycle.png)
@@ -72,22 +93,3 @@ type GetGopher struct {
 ```
 
 The interactor `GetGopher` then can be seen as a mapping of `GetGopherRequest`s to `GopherResponse`s. Because the requests and responses are **plain dumb objects**, this implementation is not dependent of any technology. It is the duty of the API layer to translate the request from, e.g., JSON, to the request DTO, but the interactor doesn't know anything about the protocol or its environment.
-
-# Implementational hierarchy
-
-![Organization](https://dl.dropboxusercontent.com/u/11213781/ebi/hierarchy.png)
-
-Furthermore, it is good practice to separate the EBI architecture itself into five different layers. These layers correspond to namespaces or packages in your language of choice.
-
-* The **Host** layer implements a physical manifestation of the API, e.g., a web server
-* The **API** layer is the interface to the program itself, which accepts input and translates it into DTOs, passing them to 
-* The **Boundary** layer which is an **abstract** interface between interactors and the API, the boundary layer is concretely is implemented by 
-* The **Service** layer which receives information from and delivers results to the boundary, containing the main program logic which manipulates 
-* The **Entity** layer which contains dumb objects that represent program models and data
-
-Thus, when a program is constructed, the API is given 
-
-* A set of boundaries it needs to talk to
-* A set of interactors that implement these functionalities
-
-![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
