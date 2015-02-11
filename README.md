@@ -6,20 +6,30 @@ series of talks titled
 [Architecture: The Lost Years](https://www.youtube.com/watch?v=HhNIttd87xs) and [his book](http://www.amazon.com/Software-Development-Principles-Patterns-Practices/dp/0135974445/ref=asap_bc?ie=UTF8).
 
 The EBI architecture is a modern application architecture suited for a
-wide range of application styles. It is especially suitable for web
-applications and APIs, but the idea of EBI is to produce an
-implementation agnostic architecture, it is not tied to a specific
+wide range of application styles. It is especially suitable for web application APIS, 
+but the idea of EBI is to produce an implementation agnostic architecture, it is not tied to a specific
 platform, application, language or framework. It is a way to design
 programs, not a library.
 
-Ultimately, the goal is the *separation of concerns* between application layers, this architecture and many like it aren't dependent on presentation models or platforms.
+Examples of how to implement the architecture are given in this document and are written in Go.
 
-This repository contains a range of examples of how to implement the
-architecture in different languages.
+## Goals & Motivation
+
+> "The architecture of something screams the intent." &mdash;Robert C. Martin
+
+As Martin points out, a lot of the times when looking at web applications you see library and tooling extrusions, but the *purpose* of the program is opaque. 
+
+> "The architecture of an application is driven by its use cases." &mdash;Ivar Jacobsen
+
+The idea is to design programs so that their architectures immediately present their use case. EBI is a way to do that. It's a way to design programs so that its modules are organized cleanly and its architecture uses loose coupling to remain extensible.
+
+Ultimately, the goal is the *separation of concerns* between application layers, this architecture and many like it aren't dependent on presentation models or platforms.
 
 # Glossary
 
 ![An illustration](https://dl.dropboxusercontent.com/u/11213781/ebi/overview.png)
+
+The architecture can be approached from two different perspectives. The first is the depedency graph, as you can see above. The second is the hierarchy graph, which presents a concrete separation in a program.
 
 The architecture is best described as a *functional data-driven*
 architecture, where requests are processed into results. The
@@ -34,9 +44,9 @@ architecture consists of three different components.
 
 * **Interactors** manipulate entities. Their job is to accept requests through the boundaries and manipulate application state. Interactors is the business logic layer of the application: interactors *act* on requests and decide what to do with them. Interactors know of request and response models called **DTOs**, data transfer objects. Interactors are **concrete** implementations of boundaries.
 
-Additionally, there is one particular specialized boundary called an *entity gateway*. 
+Interactors can *interact* with other services through gateways. 
 
-* **Entity gateways** are *internal* unexposed components that interactors depend upon for their program logic. An internal database is an entity gateway, a web service that interactors need is an entity gateway. The distinction between a boundary, of which a gateway is a specialized abstraction, is that boundaries are usually visible to the outside world, or they are often *the* link to the outside world, but gateways are totally invisible to the end user.
+* **Gateways** are boundaries not part of the delivery interface that interactors depend upon for their program logic. These are useful for abstracting external interfaces. A database layer or a webservice are abstracted behind boundaries, and they behave exactly like other boundaries. The only difference is in exposure: boundaries are usually visible to the outside world, but gateways are completely inaccessible via the API.
 
 # Request and Response Lifecycle for Interactors
 
@@ -46,12 +56,17 @@ A *request DTO* enters the application via the request boundary. This is usually
 
 The request DTO canand be modelled as an object like so.
 ```Go
-type GetGopherRequest struct {
-	Id		int
-}
+package requests
 
-type GopherResponse struct {
-	Id		int
+type GetGopher struct {
+	Id	int
+}
+```
+```Go
+package responses
+
+type GetGopher struct {
+	Id	int
 	Name	string
 }
 ```
@@ -62,13 +77,17 @@ The interactor `GetGopher` then can be seen as a mapping of `GetGopherRequest`s 
 
 ![Organization](https://dl.dropboxusercontent.com/u/11213781/ebi/hierarchy.png)
 
-Furthermore, it is good practice to separate the EBI architecture itself into its own *service* layer, and provide a wrapping around that in the API layer. The API layer functionalities would commonly be registered to different HTTP verbs or user interactions in a GUI application, but still speak in the clean data language of DTOs. In summary, the API layer:
+Furthermore, it is good practice to separate the EBI architecture itself into five different layers. These layers correspond to namespaces or packages in your language of choice.
 
-* contains a set of **boundaries** that one or more **interactors** implement
-* translates data from the outside world into request and response DTOs, passing them to boundaries,
-* is not dependent of any protocol, only data formats (JSON, XML),
-* is unit testable with simple DTOs.
+* The **Host** layer implements a physical manifestation of the API, e.g., a web server
+* The **API** layer is the interface to the program itself, which accepts input and translates it into DTOs, passing them to 
+* The **Boundary** layer which is an **abstract** interface between interactors and the API, the boundary layer is concretely is implemented by 
+* The **Service** layer which receives information from and delivers results to the boundary, containing the main program logic which manipulates 
+* The **Entity** layer which contains dumb objects that represent program models and data
 
-The **service** layer contains the **boundaries** that the API layer calls. Their actual implementation is implemented by interactors. The manipulation can occur in a variety of ways, but any database should be abstracted via some delivery mechanism in a gateway, viz., databases and other web services interactors rely on.
+Thus, when a program is constructed, the API is given 
+
+* A set of boundaries it needs to talk to
+* A set of interactors that implement these functionalities
 
 ![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
