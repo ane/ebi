@@ -40,11 +40,11 @@ architecture consists of three different components.
   the models and data of the program. They could be `Book`s in a
   library or `Employee` in an employee registry.
 
-* **Boundaries** are abstractions for transferring data from the outside world to actual business logic side. Succintly put, boundaries are *delivery mechanisms*. A boundary can implement a graphical user interface of an application or its HTTP API. Boundaries are abstractions that *interactors* implement. A boundary is a mapping from a *request* to a *response*.
+* **Boundaries** are the link to the outside world. A boundary can implement functionality for processing data for a graphical user interface or a web API. Boundaries are functional in nature: they accept data *requests* and produce *responses* as result. These abstractions are concretely implemented by interactors.
 
 * **Interactors** manipulate entities. Their job is to accept requests through the boundaries and manipulate application state. Interactors is the business logic layer of the application: interactors *act* on requests and decide what to do with them. Interactors know of request and response models called **DTOs**, data transfer objects. Interactors are **concrete** implementations of boundaries.
 
-Interactors can *interact* with other services through gateways. 
+Internally, interactors interact with other services through gateways. 
 
 * **Gateways** are boundaries not part of the delivery interface that interactors depend upon for their program logic. These are useful for abstracting external interfaces. A database layer or a webservice are abstracted behind boundaries, and they behave exactly like other boundaries. The only difference is in exposure: boundaries are usually visible to the outside world, but gateways are completely inaccessible via the API.
 
