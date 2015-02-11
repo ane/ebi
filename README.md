@@ -48,6 +48,17 @@ Internally, interactors interact with other services through gateways.
 
 * **Gateways** are boundaries not part of the delivery interface that interactors depend upon for their program logic. These are useful for abstracting external interfaces. A database layer or a webservice are abstracted behind boundaries, and they behave exactly like other boundaries. The only difference is in exposure: boundaries are usually visible to the outside world, but gateways are completely inaccessible via the API.
 
+![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
+*What the object diagram of the program looks like.*
+
+# Request and Response Lifecycle for Interactors
+
+![Request lifecycle](https://dl.dropboxusercontent.com/u/11213781/ebi/lifecycle.png)
+
+A *request DTO* enters the application via the request boundary. This is usually the API layer sitting on top of some interactor. In the pictured example, we have a `GetGopher` interactor whose task is to retrieve information about a store of gophers, accepting `GopherRequest`s and returning `GopherResponse`s. The *user interaction* is the request DTO and in this example is in plain JSON.
+
+The interactor `GetGopher` then can be seen as a mapping of `GetGopherRequest`s to `GopherResponse`s. Because the requests and responses are **plain dumb objects**, this implementation is not dependent of any technology. It is the duty of the API layer to translate the request from, e.g., JSON, to the request DTO, but the interactor doesn't know anything about the protocol or its environment.
+
 What does a program using this architecture look like?
 
 # Module Hierarchy
@@ -67,15 +78,56 @@ Thus, when a program is constructed, the API is given
 * A set of boundaries it needs to talk to
 * A set of interactors that implement these functionalities
 
-![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
+## File structure (example)
 
-# Request and Response Lifecycle for Interactors
+Using the above list, the application can be structured as follows. 
 
-![Request lifecycle](https://dl.dropboxusercontent.com/u/11213781/ebi/lifecycle.png)
+```
+│   main.go          
+│                    
+├───api              
+│       api.go       
+│                    
+├───boundaries       
+│   ├───requests     
+│   │       gopher.go
+│   │                
+│   └───responses    
+│           gopher.go
+│                    
+├───entities         
+│       gopher.go    
+│                    
+├───host             
+│       server.go    
+│                    
+└───services          
+        gopher.go    
+```
 
-A *request DTO* enters the application via the request boundary. This is usually the API layer sitting on top of some interactor. In the pictured example, we have a `GetGopher` interactor whose task is to retrieve information about a store of gophers, accepting `GopherRequest`s and returning `GopherResponse`s. The *user interaction* is the request DTO and in this example is in plain JSON.
+Do note that due to the Go [package naming convention](http://blog.golang.org/package-names) the files are often the same. This deliberate, as the request and response models are bound to represent a single target entity, in this case, a `Gopher`, which is defined in `service/gopher.go` as follows:
 
-The request DTO canand be modelled as an object like so.
+```Go
+package entities
+
+type Gopher struct {
+	Name	string
+	Age	int
+}
+```
+
+Entities are manipulated by interactors, which implement boundaries. An example boundary could be as follows.
+
+```Go
+package boundaries
+
+type GopherFinder  {
+	Find(requests.GetGopher) (responses.GetGopher, error)
+}
+```
+
+The boundary also contains request and response models.
+
 ```Go
 package requests
 
@@ -92,4 +144,48 @@ type GetGopher struct {
 }
 ```
 
-The interactor `GetGopher` then can be seen as a mapping of `GetGopherRequest`s to `GopherResponse`s. Because the requests and responses are **plain dumb objects**, this implementation is not dependent of any technology. It is the duty of the API layer to translate the request from, e.g., JSON, to the request DTO, but the interactor doesn't know anything about the protocol or its environment.
+An interactor that implements this boundary simply need to implement the `Find` method.
+
+```Go
+package services
+
+type GopherService struct {
+	Gophers map[int]Gopher
+}
+
+// Registering this method to the GopherService struct, "(gs GopherService)",
+// makes GopherService implement the GopherFinder interface. Yay for structural typing!
+func (gs GopherService) Find(req requests.GetGopher) (responses.GetGopher, error) {
+	if gopher, exists := gs.Gophers[req.Id]; exists {
+		return responses.GetGopher{Id: req.Id, Name: gopher.Name}, nil
+	} else {
+		return responses.GetGopher{}, errors.New("Gopher not found")
+	}
+}
+```
+
+When an API is constructed, it is given the interactors as parameters.
+
+```Go
+package api
+
+type GopherAPI struct {
+	GopherFinder boundaries.GopherFinder
+}
+
+func NewGopherAPI(gopherFinder boundaries.GopherFinder) *GopherAPI {
+	return &GopherAPI{gopherFinder}
+}
+
+func (api GopherAPI) GetGopher(rw http.ResponseWriter, req *http.Request) {
+	// ... parse JSON into a requests.GetGopher
+	result, err := api.GopherFinder.Find(gopherReq)
+	if err != nil {
+		// handle the error
+	}
+	// send result back to the ResponseWriter
+}
+```
+
+Finally, the host is a simple web server that builds the API.
+
