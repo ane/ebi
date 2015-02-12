@@ -87,7 +87,9 @@ Using the above list, the application can be structured as follows.
 │   │   ├── entity.go
 │   │   └── gopher.go
 │   └── interactors
-│       └── gopher.go
+│       ├── gopher.go
+│       ├── translator.go
+│       └── validator.go
 ├── host
 │   └── webserver.go
 ├── main.go
@@ -99,7 +101,6 @@ Using the above list, the application can be structured as follows.
     ├── responses
     │   └── gopher.go
     └── service.go
-
 ```
 
 ## Implementation 
