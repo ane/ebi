@@ -44,10 +44,6 @@ architecture consists of three different components.
 
 * **Interactors** manipulate entities. Their job is to accept requests through the boundaries and manipulate application state. Interactors is the business logic layer of the application: interactors *act* on requests and decide what to do with them. Interactors know of request and response models called **DTOs**, data transfer objects. Interactors are **concrete** implementations of boundaries.
 
-Internally, interactors interact with other services through gateways. 
-
-* **Gateways** are boundaries not part of the delivery interface that interactors depend upon for their program logic. These are useful for abstracting external interfaces. A database layer or a webservice are abstracted behind boundaries, and they behave exactly like other boundaries. The only difference is in exposure: boundaries are usually visible to the outside world, but gateways are completely inaccessible via the API.
-
 ![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
 *What the object diagram of the program looks like.*
 
@@ -71,7 +67,7 @@ Furthermore, it is good practice to separate the EBI architecture itself into fi
 * The **API** layer is the interface to the program itself, which accepts input and translates it into DTOs, passing them to 
 * The **Boundary** layer which is an **abstract** interface between interactors and the API, the boundary layer is concretely is implemented by 
 * The **Service** layer which receives information from and delivers results to the boundary, containing the main program logic which manipulates 
-* The **Entity** layer which contains dumb objects that represent program models and data
+* The **Entity** layer which contains objects that represent program models and data
 
 Thus, when a program is constructed, the API is given 
 
@@ -83,29 +79,42 @@ Thus, when a program is constructed, the API is given
 Using the above list, the application can be structured as follows. 
 
 ```
-│   main.go          
-│                    
-├───api              
-│       api.go       
-│                    
-├───boundaries       
-│   ├───requests     
-│   │       gopher.go
-│   │                
-│   └───responses    
-│           gopher.go
-│                    
-├───entities         
-│       gopher.go    
-│                    
-├───host             
-│       server.go    
-│                    
-└───services          
-        gopher.go    
+.
+├── api
+│   └── gopher.go
+├── core
+│   ├── entities
+│   │   ├── entity.go
+│   │   └── gopher.go
+│   └── interactors
+│       └── gopher.go
+├── host
+│   └── webserver.go
+├── main.go
+└── service
+    ├── boundaries
+    │   └── gopher.go
+    ├── requests
+    │   └── gopher.go
+    ├── responses
+    │   └── gopher.go
+    └── service.go
+
 ```
 
-Do note that due to the Go [package naming convention](http://blog.golang.org/package-names) the files are often the same. This deliberate, as the request and response models are bound to represent a single target entity, in this case, a `Gopher`, which is defined in `service/gopher.go` as follows:
+## Implementation 
+
+The `api` folder contains the API, the `host` web servers or GUI apps, the `service` contains the boundary layer with the request and responses models, the `core` layer contains the core program architecture hidden from view. 
+
+As mentioned previously, the purpose of the program should be visible by looking at it. We can now explore the boundaries in `boundaries/gopher.go` to see what the program is supposed to do.
+
+### Service layer
+
+The common language spoken by the boundaries and interactors are requests and responses. Both interfaces are defined in `service.go`.
+
+asdfasdf
+
+Do note that due to the Go [package naming convention](http://blog.golang.org/package-names) the files are often the same. This deliberate, as the request and response models are bound to represent a single target entity, in this case, a `Gopher`, which is defined in `service/gopher.go`. Entities are objects that contain their internal validation logic, thus they implement the `Validate`
 
 ```Go
 package entities
@@ -171,19 +180,6 @@ package api
 
 type GopherAPI struct {
 	GopherFinder boundaries.GopherFinder
-}
-
-func NewGopherAPI(gopherFinder boundaries.GopherFinder) *GopherAPI {
-	return &GopherAPI{gopherFinder}
-}
-
-func (api GopherAPI) GetGopher(rw http.ResponseWriter, req *http.Request) {
-	// ... parse JSON into a requests.GetGopher
-	result, err := api.GopherFinder.Find(gopherReq)
-	if err != nil {
-		// handle the error
-	}
-	// send result back to the ResponseWriter
 }
 ```
 
