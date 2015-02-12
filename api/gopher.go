@@ -1,11 +1,11 @@
 package api
 
-import "github.com/ane/ebi/service/boundaries"
+import "github.com/ane/ebi/service"
 
 type GopherAPI struct {
-	Gophers boundaries.Gophers
+	Gophers service.Gophers
 }
 
-func NewAPI(gophers boundaries.Gophers) *GopherAPI {
+func NewAPI(gophers service.Gophers) *GopherAPI {
 	return &GopherAPI{gophers}
 }
