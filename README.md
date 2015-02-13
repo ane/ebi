@@ -208,8 +208,8 @@ type Translator interface {
 	As(service.Response) error
 }
 
-// Entity is an interface for an object that contains business rules. It can validate incoming transformations to
-// itself and it can also convert itself into simpler data structures.
+// Entity is an interface for an object that contains business rules. It can validate incoming
+// transformations to itself and it can also convert itself into simpler data structures.
 type Entity interface {
 	Validator
 	Translator
