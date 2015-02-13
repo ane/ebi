@@ -94,9 +94,7 @@ Using the above list, the application can be structured as follows.
 │   │   ├── entity.go
 │   │   └── gopher.go
 │   └── interactors
-│       ├── gophers.go
-│       ├── translator.go
-│       └── validator.go
+│       └── gophers.go
 ├── host
 │   └── webserver.go
 ├── main.go
@@ -189,4 +187,32 @@ The naming convention is to have a service "Foobar"  (in caps, can be a pluraliz
 
 Though these interfaces are named similarly, in Go, we refer to these types as `requests.GetGopher`, hence it is never ambiguous as to what the structures are. The `requests` (or responses) packages contain only structures like these, hence there will never be any confusion between the two.
 
-### asdfasdf
+This concludes the definition for the Service layer. This the the common "runtime" of the application, if you will, these are the elements both the API and internal logic see. It can also be exported as a library, hence it is easy to extend.
+
+### Core layer
+
+The core layer contains actual business logic. First we start off with the entity, the rich business objects of the application. In `core/entities/entity.go`,
+
+```Go
+package entities
+
+import "github.com/ane/ebi/service"
+
+// Validator is an interface that validates incoming requests to see if these are valid transformations.
+type Validator interface {
+	Validate(service.Request) error
+}
+
+// Translator is an interface that translates itself into a simpler structure.
+type Translator interface {
+	As(service.Response) error
+}
+```
+
+// Entity is an interface for an object that contains business rules. It can validate incoming transformations to
+// itself and it can also convert itself into simpler data structures.
+type Entity interface {
+	Validator
+	Translator
+}
+```
