@@ -13,7 +13,7 @@ but the idea of EBI is to produce an implementation agnostic architecture, it is
 platform, application, language or framework. It is a way to design
 programs, not a library.
 
-The name **Entity&ndash;Boundary;Interactor** originates from [a master's thesis](https://jyx.jyu.fi/dspace/bitstream/handle/123456789/41024/URN:NBN:fi:jyu-201303071297.pdf?sequence=1) where this architecture is studied in depth. Names that are common or synonymous are **EBC** where *C* stands for **Controller**.
+The name **Entity&ndash;Boundary&ndash;Interactor** originates from [a master's thesis](https://jyx.jyu.fi/dspace/bitstream/handle/123456789/41024/URN:NBN:fi:jyu-201303071297.pdf?sequence=1) where this architecture is studied in depth. Names that are common or synonymous are **EBC** where *C* stands for **Controller**.
 
 Examples of how to implement the architecture are given in this document and are written in Go.
 
@@ -31,7 +31,7 @@ Ultimately, the goal is the *separation of concerns* between application layers,
 
 # Glossary
 
-![An illustration](https://dl.dropboxusercontent.com/u/11213781/ebi/overview.png)
+![An illustration](docs/images/overview.png)
 
 The architecture can be approached from two different perspectives. The first is the depedency graph, as you can see above. The second is the hierarchy graph, which presents a concrete separation in a program.
 
@@ -48,12 +48,12 @@ architecture consists of three different components.
 
 * **Interactors** manipulate entities. Their job is to accept requests through the boundaries and manipulate application state. Interactors is the business logic layer of the application: interactors *act* on requests and decide what to do with them. Interactors know of request and response models called **DTOs**, data transfer objects. Interactors are **concrete** implementations of boundaries.
 
-![API](https://dl.dropboxusercontent.com/u/11213781/ebi/api.png)
+![API](docs/images/boundary.png)
 *What the object diagram of the program looks like.*
 
 # Request and Response Lifecycle for Interactors
 
-![Request lifecycle](https://dl.dropboxusercontent.com/u/11213781/ebi/lifecycle.png)
+![Request lifecycle](docs/images/lifecycle.png)
 
 A *request DTO* enters the application via the request boundary. This is usually the API layer sitting on top of some interactor. In the pictured example, we have a `GetGopher` interactor whose task is to retrieve information about a store of gophers, accepting `GopherRequest`s and returning `GopherResponse`s. The *user interaction* is the request DTO and in this example is in plain JSON.
 
@@ -63,7 +63,7 @@ What does a program using this architecture look like?
 
 # Module Hierarchy
 
-![Organization](https://dl.dropboxusercontent.com/u/11213781/ebi/hierarchy.png)
+![Organization](docs/images/hierarchy.png)
 
 Furthermore, it is good practice to separate the EBI architecture itself into five different layers. These layers correspond to namespaces or packages in your language of choice.
 
