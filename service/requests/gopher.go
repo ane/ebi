@@ -1,6 +1,6 @@
 package requests
 
-type GetGopher struct {
+type FindGopher struct {
 	ID int
 }
 

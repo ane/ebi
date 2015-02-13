@@ -1,4 +1,6 @@
-## Entity&ndash;Boundary&ndash;Interactor: A modern application architecture
+## Entity&ndash;Boundary&ndash;Interactor
+
+### A modern application architecture
 
 This repository contains implementation examples of the **Entity-Boundary-Interactor**
 (**EBI**) application architecture as presented by Uncle Bob in his
@@ -10,6 +12,8 @@ wide range of application styles. It is especially suitable for web application 
 but the idea of EBI is to produce an implementation agnostic architecture, it is not tied to a specific
 platform, application, language or framework. It is a way to design
 programs, not a library.
+
+The name **Entity&ndash;Boundary;Interactor** originates from [a master's thesis](https://jyx.jyu.fi/dspace/bitstream/handle/123456789/41024/URN:NBN:fi:jyu-201303071297.pdf?sequence=1) where this architecture is studied in depth. Names that are common or synonymous are **EBC** where *C* stands for **Controller**.
 
 Examples of how to implement the architecture are given in this document and are written in Go.
 
@@ -65,16 +69,19 @@ Furthermore, it is good practice to separate the EBI architecture itself into fi
 
 * The **Host** layer implements a physical manifestation of the API, e.g., a web server
 * The **API** layer is the interface to the program itself, which accepts input and translates it into DTOs, passing them to 
-* The **Boundary** layer which is an **abstract** interface between interactors and the API, the boundary layer is concretely is implemented by 
-* The **Service** layer which receives information from and delivers results to the boundary, containing the main program logic which manipulates 
-* The **Entity** layer which contains objects that represent program models and data
+* The **Service** layer that contains **boundaries** and **response** and **request** models
+* The **Core** layer that contains a concrete implementation of the service layer
+  * **Interactors** which implement boundaries and form the core business logic of the application
+  * **Entities** which represent the data models of the program
 
 Thus, when a program is constructed, the API is given 
 
 * A set of boundaries it needs to talk to
 * A set of interactors that implement these functionalities
 
-## File structure (example)
+And that's it. The interactors do not know what protocol its requests come from or are sent to, and the API doesn't know what sort of an interactor implements the service boundary.
+
+## Example SOA implementation in Go
 
 Using the above list, the application can be structured as follows. 
 
@@ -87,102 +94,97 @@ Using the above list, the application can be structured as follows.
 │   │   ├── entity.go
 │   │   └── gopher.go
 │   └── interactors
-│       ├── gopher.go
+│       ├── gophers.go
 │       ├── translator.go
 │       └── validator.go
 ├── host
 │   └── webserver.go
 ├── main.go
 └── service
-    ├── boundaries
-    │   └── gopher.go
     ├── requests
     │   └── gopher.go
     ├── responses
     │   └── gopher.go
     └── service.go
+    └── gophers.go
 ```
 
 ## Implementation 
 
 The `api` folder contains the API, the `host` web servers or GUI apps, the `service` contains the boundary layer with the request and responses models, the `core` layer contains the core program architecture hidden from view. 
 
-As mentioned previously, the purpose of the program should be visible by looking at it. We can now explore the boundaries in `boundaries/gopher.go` to see what the program is supposed to do.
+As mentioned previously, the purpose of the program should be visible by looking at it. By exploring the `service` directory (containing `gophers.go` *et al.*) we can immediately see the services this program provides.
 
 ### Service layer
 
 The common language spoken by the boundaries and interactors are requests and responses. Both interfaces are defined in `service.go`.
 
-asdfasdf
+```Go
+package service
 
-Do note that due to the Go [package naming convention](http://blog.golang.org/package-names) the files are often the same. This deliberate, as the request and response models are bound to represent a single target entity, in this case, a `Gopher`, which is defined in `service/gopher.go`. Entities are objects that contain their internal validation logic, thus they implement the `Validate`
+// Request is a request to any service.
+type Request interface{}
+
+// Response is a response to a request.
+type Response interface{}
+```
+
+These are empty interfaces. As a result, in Go, any type implements this interface, so this is just naming sugar for now, as logic can be added into these interfaces later when this architecture spec develops further.
+
+The service layer also contains definitions for different sorts of boundaries. The simplest of which is a `Finder` boundary that finds resources based on a request.
 
 ```Go
-package entities
-
-type Gopher struct {
-	Name	string
-	Age	int
+type Finder interface {
+	Find(Request) (Response, error)
 }
 ```
 
-Entities are manipulated by interactors, which implement boundaries. An example boundary could be as follows.
+The second boundary is a `Creator` boundary which creates resources.
 
 ```Go
-package boundaries
-
-type GopherFinder  {
-	Find(requests.GetGopher) (responses.GetGopher, error)
+type Creator interface {
+	Create(Request) (Response, error)
 }
 ```
 
-The boundary also contains request and response models.
+We can now implement the Gophers service (which finds and stores gophers).
+
+```Go
+package service
+
+type Gophers interface {
+	Finder
+	Creator
+}
+```
+
+The response and request models live in `responses/gopher.go` and `requests/gopher.go`.
 
 ```Go
 package requests
 
-type GetGopher struct {
-	Id	int
+type FindGopher struct {
+	ID int
+}
+
+type CreateGopher struct {
+	Name string
+	Age  int
 }
 ```
+
 ```Go
 package responses
 
-type GetGopher struct {
-	Id	int
-	Name	string
+type FindGopher struct {
+	ID   int
+	Name string
+	Age  int
 }
+
+type CreateGopher struct{}
 ```
 
-An interactor that implements this boundary simply need to implement the `Find` method.
+Though these interfaces are named similarly, in Go, we refer to these types as `requests.GetGopher`, hence it is never ambiguous as to what the structures are. The `requests` (or responses) packages contain only structures like these, hence there will never be any confusion between the two.
 
-```Go
-package services
-
-type GopherService struct {
-	Gophers map[int]Gopher
-}
-
-// Registering this method to the GopherService struct, "(gs GopherService)",
-// makes GopherService implement the GopherFinder interface. Yay for structural typing!
-func (gs GopherService) Find(req requests.GetGopher) (responses.GetGopher, error) {
-	if gopher, exists := gs.Gophers[req.Id]; exists {
-		return responses.GetGopher{Id: req.Id, Name: gopher.Name}, nil
-	} else {
-		return responses.GetGopher{}, errors.New("Gopher not found")
-	}
-}
-```
-
-When an API is constructed, it is given the interactors as parameters.
-
-```Go
-package api
-
-type GopherAPI struct {
-	GopherFinder boundaries.GopherFinder
-}
-```
-
-Finally, the host is a simple web server that builds the API.
-
+### asdfasdf

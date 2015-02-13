@@ -25,12 +25,12 @@ func (g Gophers) getFreeKey() int {
 	for range g.Burrow {
 		key++
 	}
-	return key
+	return key + 1
 }
 
 // Find finds a gopher from storage.
 func (g Gophers) Find(req service.Request) (service.Response, error) {
-	r, is := req.(requests.GetGopher)
+	r, is := req.(requests.FindGopher)
 	if !is {
 		return nil, errors.New("Invalid request DTO given.")
 	}
@@ -40,7 +40,7 @@ func (g Gophers) Find(req service.Request) (service.Response, error) {
 		return nil, errors.New("Not found.")
 	}
 
-	return gopher.Data(responses.GetGopher{})
+	return gopher.Data(responses.FindGopher{})
 }
 
 // Create creates a gopher.

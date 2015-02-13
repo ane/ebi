@@ -1,6 +1,6 @@
 package responses
 
-type GetGopher struct {
+type FindGopher struct {
 	ID   int
 	Name string
 	Age  int

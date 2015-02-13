@@ -13,15 +13,16 @@ func main() {
 	api := api.NewAPI(interactors.NewGophers())
 
 	api.Gophers.Create(requests.CreateGopher{Name: "Munch", Age: 2})
-	resp, err := api.Gophers.Find(requests.GetGopher{ID: 0})
+	resp, err := api.Gophers.Find(requests.FindGopher{ID: 0})
 	if err != nil {
-		fmt.Println("Error: ", err.Error())
-	}
+		fmt.Println("Error:", err.Error())
+	} else {
+		r, ok := resp.(responses.FindGopher)
+		if !ok {
+			fmt.Printf("Not responses.GetGopher, but %T.\n", r)
+		} else {
 
-	r, ok := resp.(responses.GetGopher)
-	if !ok {
-		fmt.Printf("Not responses.GetGopher, but %T.\n", r)
+			fmt.Printf("%#v\n", r)
+		}
 	}
-
-	fmt.Printf("%#v\n", r)
 }

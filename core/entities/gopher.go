@@ -18,16 +18,16 @@ type Gopher struct {
 	Age  int
 }
 
-func (g Gopher) asGetGopher() (responses.GetGopher, error) {
-	return responses.GetGopher{ID: g.ID, Name: g.Name, Age: g.Age}, nil
+func (g Gopher) asFindGopher() (responses.FindGopher, error) {
+	return responses.FindGopher{ID: g.ID, Name: g.Name, Age: g.Age}, nil
 }
 
 // Data implements the Translator interface, converting this entity to some DTO.
 func (g Gopher) Data(as interface{}) (service.Response, error) {
 	t := reflect.TypeOf(as)
 	switch {
-	case t == reflect.TypeOf(responses.GetGopher{}):
-		return g.asGetGopher()
+	case t == reflect.TypeOf(responses.FindGopher{}):
+		return g.asFindGopher()
 	default:
 		return nil, fmt.Errorf("Unrecognized response model %T", as)
 	}
