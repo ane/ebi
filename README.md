@@ -131,23 +131,23 @@ type Response interface{}
 
 These are empty interfaces. As a result, in Go, any type implements this interface, so this is just naming sugar for now, as logic can be added into these interfaces later when this architecture spec develops further.
 
-The service layer also contains definitions for different sorts of boundaries. The simplest of which is a `Finder` boundary that finds resources based on a request.
+The service layer also contains definitions for different sorts of boundaries. The simplest of which is a `Finder` boundary that finds resources based on a request, in `service/boundaries.go`.
 
 ```Go
+package service
+
+// Creator is a boundary that creates resources.
+type Creator interface {
+	Create(Request) (Response, error)
+}
+
+// Finder is a boundary that finds resources.
 type Finder interface {
 	Find(Request) (Response, error)
 }
 ```
 
-The second boundary is a `Creator` boundary which creates resources.
-
-```Go
-type Creator interface {
-	Create(Request) (Response, error)
-}
-```
-
-We can now implement the Gophers service (which finds and stores gophers).
+We can now implement the Gophers service (which finds and stores gophers) in `service/gophers.go`.
 
 ```Go
 package service
@@ -158,7 +158,7 @@ type Gophers interface {
 }
 ```
 
-The response and request models live in `responses/gopher.go` and `requests/gopher.go`.
+The response and request models live in `responses/gophesr.go` and `requests/gophers.go`.
 
 ```Go
 package requests
@@ -184,6 +184,8 @@ type FindGopher struct {
 
 type CreateGopher struct{}
 ```
+
+The naming convention is to have a service "Foobar"  (in caps, can be a pluralized noun), and have it in `service/foobar.go`, and its request and response models are *all* in `service/requests/foobar.go` and `service/responses/foobar.go`.
 
 Though these interfaces are named similarly, in Go, we refer to these types as `requests.GetGopher`, hence it is never ambiguous as to what the structures are. The `requests` (or responses) packages contain only structures like these, hence there will never be any confusion between the two.
 
