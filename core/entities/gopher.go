@@ -22,8 +22,8 @@ func (g Gopher) asFindGopher() (responses.FindGopher, error) {
 	return responses.FindGopher{ID: g.ID, Name: g.Name, Age: g.Age}, nil
 }
 
-// Data implements the Translator interface, converting this entity to some DTO.
-func (g Gopher) Data(as interface{}) (service.Response, error) {
+// As implements the Translator interface, converting this entity to some DTO.
+func (g Gopher) As(as interface{}) (service.Response, error) {
 	t := reflect.TypeOf(as)
 	switch {
 	case t == reflect.TypeOf(responses.FindGopher{}):
