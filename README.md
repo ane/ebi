@@ -226,7 +226,7 @@ type Validator interface {
 }
 ```
 
-Entities are able to validate transformations to itself, but do not know how to convert themselves into an representation. This is the duty of the interactor, which can manipulate the entities in a richer context. *Note: it is not entirely certain yet whether the interactor should take care of both, or neither.*
+Entities are able to validate transformations to itself. Transforming them into response DTOs is the duty of the interactor, which can manipulate the entities in a richer context. *Note: it is not entirely certain yet whether the interactor should take care of both, or neither.*
 
 In Go, to satisfy this interface, have your entity implement the `Validate` method. In other languages, you could inherit an `IValidator` interface that contains at least one validation method. With Go only one is necessary, as we can do type checks to determine what the request is and report any validation errors. 
 
