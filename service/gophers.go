@@ -9,4 +9,5 @@ import (
 type Gophers interface {
 	Create(requests.CreateGopher) (responses.CreateGopher, error)
 	Find(requests.FindGopher) (responses.FindGopher, error)
+	FindAll(requests.FindGopher) ([]responses.FindGopher, error)
 }

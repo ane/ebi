@@ -2,6 +2,7 @@ package entities
 
 import (
 	"errors"
+
 	"fmt"
 
 	"github.com/ane/ebi/service"
@@ -16,18 +17,9 @@ type Gopher struct {
 	Age  int
 }
 
-func (g Gopher) asFindGopher() (responses.FindGopher, error) {
+// ToFindGopher produces a Gopher out of this entity.
+func (g *Gopher) ToFindGopher() (responses.FindGopher, error) {
 	return responses.FindGopher{ID: g.ID, Name: g.Name, Age: g.Age}, nil
-}
-
-// As implements the Translator interface, converting this entity to some DTO.
-func (g Gopher) Translate(req service.Response) (service.Response, error) {
-	switch req.(type) {
-	case requests.FindGopher:
-		return g.asFindGopher()
-	default:
-		return nil, fmt.Errorf("Unrecognized response model %T", req)
-	}
 }
 
 func (g Gopher) Validate(req service.Request) error {
@@ -39,8 +31,6 @@ func (g Gopher) Validate(req service.Request) error {
 		if r.Name == "" {
 			return errors.New("I need a non-empty name.")
 		}
-	default:
-		return errors.New("I don't know how to validate that!")
 	}
-	return nil
+	return fmt.Errorf("I don't know how to validate %T", req)
 }

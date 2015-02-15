@@ -4,61 +4,61 @@ import (
 	"errors"
 
 	"github.com/ane/ebi/core/entities"
-	"github.com/ane/ebi/service"
 	"github.com/ane/ebi/service/requests"
 	"github.com/ane/ebi/service/responses"
 )
 
 type Gophers struct {
-	Entity entities.Entity
-	Burrow map[int]entities.Gopher
+	burrow map[int]entities.Gopher
 }
 
 func NewGophers() *Gophers {
 	return &Gophers{
-		Entity: entities.Gopher{},
-		Burrow: make(map[int]entities.Gopher),
+		burrow: make(map[int]entities.Gopher),
 	}
 }
 
 func (g Gophers) getFreeKey() int {
 	key := 0
-	for range g.Burrow {
+	for range g.burrow {
 		key++
 	}
 	return key + 1
 }
 
 // Find finds a gopher from storage.
-func (g Gophers) Find(req service.Request) (service.Response, error) {
-	r, is := req.(requests.FindGopher)
-	if !is {
-		return nil, errors.New("Invalid request DTO given.")
-	}
-
-	gopher, exists := g.Burrow[r.ID]
+func (g Gophers) Find(req requests.FindGopher) (responses.FindGopher, error) {
+	gopher, exists := g.burrow[req.ID]
 	if !exists {
-		return nil, errors.New("Not found.")
+		return responses.FindGopher{}, errors.New("Not found.")
 	}
 
-	return gopher.Translate(requests.FindGopher{})
+	return gopher.ToFindGopher()
+}
+
+func (g Gophers) FindAll(req requests.FindGopher) ([]responses.FindGopher, error) {
+	var resps []responses.FindGopher
+	for _, gopher := range g.burrow {
+		fg, err := gopher.ToFindGopher()
+		if err != nil {
+			return []responses.FindGopher{}, err
+		}
+		resps = append(resps, fg)
+	}
+	return resps, nil
 }
 
 // Create creates a gopher.
-func (g Gophers) Create(req service.Request) (service.Response, error) {
-	r, is := req.(requests.CreateGopher)
-	if !is {
-		return nil, errors.New("Invalid request DTO given.")
-	}
-
+func (g Gophers) Create(req requests.CreateGopher) (responses.CreateGopher, error) {
 	var gopher entities.Gopher
-	if err := gopher.Validate(&r); err != nil {
-		return nil, err
+	if err := gopher.Validate(req); err != nil {
+		return responses.CreateGopher{}, err
 	}
 
 	gopher.ID = g.getFreeKey()
-	gopher.Name = r.Name
-	gopher.Age = r.Age
+	gopher.Name = req.Name
+	gopher.Age = req.Age
+	g.burrow[gopher.ID] = gopher
 
 	return responses.CreateGopher{ID: gopher.ID}, nil
 }

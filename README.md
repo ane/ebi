@@ -155,19 +155,19 @@ When writing boundaries, there aren't any limits to their complexities. They can
 
 In Go, it is idiomatic to aim for interface composition. The `Gophers` boundary above is composed of two distinct interfaces. This allows for extensibility.
 
-Though similar to multiple inheritance, Go interfaces allow for decomposition. In Java you could define a class `FinderCreator implements Finder, Creator` but you **cannot decompose them**. This means that in Go, it is entirely valid to accept a `Creator` interface as a parameter yet pass a `FinderCreatorRemoverUpdater` and so on.
+Though similar to multiple inheritance, Go interfaces allow for decomposition. In Java you could define a class `FinderCreator implements Finder, Creator` but you **cannot decompose them**. This means that in Go, it is entirely valid to define a function `func Foo(c Creator)` yet pass a `FinderCreatorRemoverUpdater` to it as a parameter. In Java or its family you can't decompose multiple inheriting classes or interfaces into their constituent interfaces.
 
 The takeaway points of boundary design are these:
 
-1. **Make loose coupling easy.** Define abstract interfaces that are easy to implement.
-2. **Decompose if you can.** If your interfaces are too big, think about splitting them into modular parts.
-3. **Boundaries are synchronous**. Calling boundaries asynchronously is easy. Make them mappings from requests to responses.
+1. Make loose coupling easy by define abstract interfaces that are easy to implement.
+2. Decompose if you can if your interfaces are too big, think about splitting them into modular parts.
+3. Make boundaries synchronous. Calling them asynchronously in the API layer is easy. Make them mappings from requests to responses.
 
 ### Request models
 
-Once the boundaries are complete, then we can move to the request and response models.
+Once the boundaries are complete, then we can move to the request and response models. These are implemented with simple structures that contain no validation logic. They are simply information vectors.
 
-In our example, the response and request models live in `responses/gophesr.go` and `requests/gophers.go`.
+In our example, the response and request models live in `responses/gophers.go` and `requests/gophers.go`.
 
 ```Go
 package requests
@@ -196,11 +196,19 @@ type CreateGopher struct{
 }
 ```
 
-The naming convention is to have a service "Foobar"  (in caps, can be a pluralized noun), and have it in `service/foobar.go`, and its request and response models are *all* in `service/requests/foobar.go` and `service/responses/foobar.go`.
+#### Designing good DTOs
 
-Though these interfaces are named similarly, in Go, we refer to these types as `requests.GetGopher`, hence it is never ambiguous as to what the structures are. The `requests` (or responses) packages contain only structures like these, hence there will never be any confusion between the two.
+DTOs have no business logic. Think of them as language constructs around simple requests not dependent of any protocol.
 
-This concludes the definition for the Service layer. This the the common "runtime" of the application, if you will, these are the elements both the API and internal logic see. It can also be exported as a library, hence it is easy to extend.
+In our Go program, the naming convention is to have a service "Foobar" (in caps, can be a pluralized noun), and have it in `service/foobar.go`, and its request and response models are *all* in `service/requests/foobar.go` and `service/responses/foobar.go`.
+
+Though these interfaces are named similarly, in Go, we refer to these types as `requests.FindGopher`, hence it is never ambiguous as to what the structures are. The `requests` (or responses) packages contain only structures like these, hence there will never be any confusion between the two.
+
+In other languages, you would usually have a suffix of some sorts or use a namespace explicitly to avoid repetition.
+
+#### Wrapping up
+
+The service layer is the common language of the application architecture. When the API and core speak to each other, they do so via an abstract boundary. They use DTOs (data transfer objects), simple structures of data, for communication. We now move on to the core layer of the architecture.
 
 ### Core layer
 
@@ -211,20 +219,42 @@ package entities
 
 import "github.com/ane/ebi/service"
 
-// Validator validates a request transformation.
+// Validator is an interface for an object that contains business rules. It can validate incoming
+// transformations to itself.
 type Validator interface {
 	Validate(service.Request) error
 }
+```
 
-// Translator translates an object into a response DTO.
-type Translator interface {
-	As(service.Response) error
-}
+Entities are able to validate transformations to itself, but do not know how to convert themselves into an representation. This is the duty of the interactor, which can manipulate the entities in a richer context. *Note: it is not entirely certain yet whether the interactor should take care of both, or neither.*
 
-// Entity is an interface for an object that contains business rules. It can validate incoming
-// transformations to itself and it can also convert itself into simpler data structures.
-type Entity interface {
-	Validator
-	Translator
+In Go, to satisfy this interface, have your entity implement the `Validate` method. In other languages, you could inherit an `IValidator` interface that contains at least one validation method. With Go only one is necessary, as we can do type checks to determine what the request is and report any validation errors. 
+
+```Go
+func (g Gopher) Validate(req service.Request) error {
+	switch r := req.(type) {
+	case requests.CreateGopher:
+		if r.Age < 0 {
+			return errors.New("My age can't be negative!")
+		}
+		if r.Name == "" {
+			return errors.New("I need a non-empty name.")
+		}
+	}
+	// don't know the interface
+	return nil
 }
 ```
+
+The alternative to this is not to define multiple interfaces for each request DTO, `ValidateCreateGopher` and so forth, this adds boilerplate but brings compile time type safety. The above implementation will throw an error if given something else than a `CreateGopher`.
+
+Some key ideas:
+
+1. Let entities validate incoming requests, but interactors do the transformations back.
+2. Validation can return multiple errors. Enrich the above code to accept a list of errors (since `error` is an interface, this is simple).
+3. Validation isn't mandatory, it is for convenience. Entities need not implement the `Validator` interface if they're simple, so this requirement isn't enforced on *all* entities.
+
+
+#### Interactors
+
+Interactors contain rich business logic.
