@@ -159,7 +159,7 @@ Though similar to multiple inheritance, Go interfaces allow for decomposition. I
 
 The takeaway points of boundary design are these:
 
-1. Make loose coupling easy by define abstract interfaces that are easy to implement.
+1. Make loose coupling easy by defining abstract interfaces that aren't too monolithic.
 2. Decompose if you can if your interfaces are too big, think about splitting them into modular parts.
 3. Make boundaries synchronous. Calling them asynchronously in the API layer is easy. Make them mappings from requests to responses.
 
@@ -219,8 +219,8 @@ package entities
 
 import "github.com/ane/ebi/service"
 
-// Validator is an interface for an object that contains business rules. It can validate incoming
-// transformations to itself.
+// Validator is an interface for an object that contains business rules.
+// It can validate incoming transformations to itself.
 type Validator interface {
 	Validate(service.Request) error
 }
