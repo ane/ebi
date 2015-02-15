@@ -242,7 +242,7 @@ func (g Gopher) Validate(req service.Request) error {
 		}
 	}
 	// don't know the interface
-	return nil
+	return fmt.Errorf("I don't know how to validate %T", req)
 }
 ```
 
