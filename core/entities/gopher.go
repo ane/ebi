@@ -1,8 +1,6 @@
 package entities
 
 import (
-	"reflect"
-
 	"errors"
 	"fmt"
 
@@ -23,28 +21,26 @@ func (g Gopher) asFindGopher() (responses.FindGopher, error) {
 }
 
 // As implements the Translator interface, converting this entity to some DTO.
-func (g Gopher) As(as interface{}) (service.Response, error) {
-	t := reflect.TypeOf(as)
-	switch {
-	case t == reflect.TypeOf(responses.FindGopher{}):
+func (g Gopher) Translate(req service.Response) (service.Response, error) {
+	switch req.(type) {
+	case requests.FindGopher:
 		return g.asFindGopher()
 	default:
-		return nil, fmt.Errorf("Unrecognized response model %T", as)
+		return nil, fmt.Errorf("Unrecognized response model %T", req)
 	}
 }
 
-func validate(req requests.CreateGopher) error {
-	return nil
-}
-
-// Validate validates the incoming requests for this entity.
-func (g Gopher) Validate(req *requests.CreateGopher) error {
-	if req.Age < 0 {
-		return errors.New("My age can't be negative!")
-	}
-
-	if req.Name == "" {
-		return errors.New("I need a non-empty name.")
+func (g Gopher) Validate(req service.Request) error {
+	switch r := req.(type) {
+	case requests.CreateGopher:
+		if r.Age < 0 {
+			return errors.New("My age can't be negative!")
+		}
+		if r.Name == "" {
+			return errors.New("I need a non-empty name.")
+		}
+	default:
+		return errors.New("I don't know how to validate that!")
 	}
 	return nil
 }

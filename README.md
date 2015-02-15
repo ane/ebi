@@ -129,34 +129,45 @@ type Response interface{}
 
 These are empty interfaces. As a result, in Go, any type implements this interface, so this is just naming sugar for now, as logic can be added into these interfaces later when this architecture spec develops further.
 
-The service layer also contains definitions for different sorts of boundaries. The simplest of which is a `Finder` boundary that finds resources based on a request, in `service/boundaries.go`.
-
-```Go
-package service
-
-// Creator is a boundary that creates resources.
-type Creator interface {
-	Create(Request) (Response, error)
-}
-
-// Finder is a boundary that finds resources.
-type Finder interface {
-	Find(Request) (Response, error)
-}
-```
-
 We can now implement the Gophers service (which finds and stores gophers) in `service/gophers.go`.
 
 ```Go
 package service
 
+import (
+	"github.com/ane/ebi/service/requests"
+	"github.com/ane/ebi/service/responses"
+)
+
+// Gophers is a boundary that can do things with gophers.
 type Gophers interface {
-	Finder
-	Creator
+	Create(requests.CreateGopher) (responses.CreateGopher, error)
+	Find(requests.FindGopher) (responses.FindGopher, error)
+	FindAll(requests.FindGopher) ([]responses.FindGopher, error)
 }
 ```
 
-The response and request models live in `responses/gophesr.go` and `requests/gophers.go`.
+#### Boundary complexity
+
+The above code presented a rather simple boundary, composed of just two methods. This is obviously suitable for a simple web application, but this is not the design goal of boundaries. The purpose of boundaries is to *decouple* the application interface and its implementation from each other.
+
+When writing boundaries, there aren't any limits to their complexities. They can contain just one method or a dozen method.
+
+In Go, it is idiomatic to aim for interface composition. The `Gophers` boundary above is composed of two distinct interfaces. This allows for extensibility.
+
+Though similar to multiple inheritance, Go interfaces allow for decomposition. In Java you could define a class `FinderCreator implements Finder, Creator` but you **cannot decompose them**. This means that in Go, it is entirely valid to accept a `Creator` interface as a parameter yet pass a `FinderCreatorRemoverUpdater` and so on.
+
+The takeaway points of boundary design are these:
+
+1. **Make loose coupling easy.** Define abstract interfaces that are easy to implement.
+2. **Decompose if you can.** If your interfaces are too big, think about splitting them into modular parts.
+3. **Boundaries are synchronous**. Calling boundaries asynchronously is easy. Make them mappings from requests to responses.
+
+### Request models
+
+Once the boundaries are complete, then we can move to the request and response models.
+
+In our example, the response and request models live in `responses/gophesr.go` and `requests/gophers.go`.
 
 ```Go
 package requests
@@ -180,7 +191,9 @@ type FindGopher struct {
 	Age  int
 }
 
-type CreateGopher struct{}
+type CreateGopher struct{
+	ID  int
+}
 ```
 
 The naming convention is to have a service "Foobar"  (in caps, can be a pluralized noun), and have it in `service/foobar.go`, and its request and response models are *all* in `service/requests/foobar.go` and `service/responses/foobar.go`.
@@ -198,12 +211,12 @@ package entities
 
 import "github.com/ane/ebi/service"
 
-// Validator is an interface that validates incoming requests to see if these are valid transformations.
+// Validator validates a request transformation.
 type Validator interface {
 	Validate(service.Request) error
 }
 
-// Translator is an interface that translates itself into a simpler structure.
+// Translator translates an object into a response DTO.
 type Translator interface {
 	As(service.Response) error
 }

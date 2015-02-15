@@ -6,4 +6,6 @@ type FindGopher struct {
 	Age  int
 }
 
-type CreateGopher struct{}
+type CreateGopher struct {
+	ID int
+}

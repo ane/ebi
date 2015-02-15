@@ -9,13 +9,14 @@ import (
 	"github.com/ane/ebi/service/responses"
 )
 
-// Gophers is an interactor that implements the boundaries.Gopher boundary.
 type Gophers struct {
+	Entity entities.Entity
 	Burrow map[int]entities.Gopher
 }
 
 func NewGophers() *Gophers {
 	return &Gophers{
+		Entity: entities.Gopher{},
 		Burrow: make(map[int]entities.Gopher),
 	}
 }
@@ -40,7 +41,7 @@ func (g Gophers) Find(req service.Request) (service.Response, error) {
 		return nil, errors.New("Not found.")
 	}
 
-	return gopher.Data(responses.FindGopher{})
+	return gopher.Translate(requests.FindGopher{})
 }
 
 // Create creates a gopher.
@@ -59,7 +60,5 @@ func (g Gophers) Create(req service.Request) (service.Response, error) {
 	gopher.Name = r.Name
 	gopher.Age = r.Age
 
-	g.Burrow[gopher.ID] = gopher
-
-	return responses.CreateGopher{}, nil
+	return responses.CreateGopher{ID: gopher.ID}, nil
 }

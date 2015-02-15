@@ -1,16 +1,15 @@
 package entities
 
 import "github.com/ane/ebi/service"
-import "reflect"
 
-// Translator translates an object into a response.
-type Translator interface {
-	As(reflect.Type) (service.Response, error)
-}
-
-// Validator validates a request for an entity.
+// Validator validates a request transformation.
 type Validator interface {
 	Validate(service.Request) error
+}
+
+// Translator translates an object into a response DTO.
+type Translator interface {
+	As(service.Response) (service.Response, error)
 }
 
 // Entity represents an entity. It needs a Validate method so that interactors can
