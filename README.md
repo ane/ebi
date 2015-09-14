@@ -215,46 +215,87 @@ The service layer is the common language of the application architecture. When t
 The core layer contains actual business logic. First we start off with the entity, the rich business objects of the application. In `core/entities/entity.go`,
 
 ```Go
-package entities
-
-import "github.com/ane/ebi/service"
-
-// Validator is an interface for an object that contains business rules.
-// It can validate incoming transformations to itself.
-type Validator interface {
-	Validate(service.Request) error
+type Gopher struct {
+    Name string
+    Age int
 }
 ```
 
-Entities are able to validate transformations to itself. Transforming them into response DTOs is the duty of the interactor, which can manipulate the entities in a richer context. *Note: it is not entirely certain yet whether the interactor should take care of both, or neither.*
+Entities are completely invisible to the outside layers. Not any thing but the interactors know about them. Entities contain business logic, e.g., a `Gopher` entity can modify itself or contain functions related to it, but the distinction between entities and interactors is the following:
 
-In Go, to satisfy this interface, have your entity implement the `Validate` method. In other languages, you could inherit an `IValidator` interface that contains at least one validation method. With Go only one is necessary, as we can do type checks to determine what the request is and report any validation errors. 
+* entities modify *themselves* vs.
+* interactors modify *entities*
 
-```Go
-func (g Gopher) Validate(req service.Request) error {
-	switch r := req.(type) {
-	case requests.CreateGopher:
-		if r.Age < 0 {
-			return errors.New("My age can't be negative!")
-		}
-		if r.Name == "" {
-			return errors.New("I need a non-empty name.")
-		}
-	}
-	// don't know the interface
-	return fmt.Errorf("I don't know how to validate %T", req)
-}
-```
-
-The alternative to this is not to define multiple interfaces for each request DTO, `ValidateCreateGopher` and so forth, this adds boilerplate but brings compile time type safety. The above implementation will throw an error if given something else than a `CreateGopher`.
-
-Some key ideas:
-
-1. Let entities validate incoming requests, but interactors do the transformations back.
-2. Validation can return multiple errors. Enrich the above code to accept a list of errors (since `error` is an interface, this is simple).
-3. Validation isn't mandatory, it is for convenience. Entities need not implement the `Validator` interface if they're simple, so this requirement isn't enforced on *all* entities.
+An entity can contain other entities: a `Gopher`, could technically possess a `Tail` and two `Eye`s, and it can modify them at will. This hierarchy is strictly unidirectional: a `Gopher` doesn't know about other gophers, more importantly, *it doesn't know about the interactor*.
 
 
 #### Interactors
 
-Interactors contain rich business logic.
+Interactors contain rich business logic. They can manipulate entities and they implement boundaries. Here, we have the `Gophers` boundary from above to implement, so we implement a smallish interactor that implements it.
+
+```Go
+type Gophers struct {
+	burrow map[int]entities.Gopher
+}
+
+func NewGophers() *Gophers {
+	return &Gophers{
+		burrow: make(map[int]entities.Gopher),
+	}
+}
+```
+
+It implements the three methods as defined by the `Gophers` boundary
+
+```Go
+// Find finds a gopher from storage.
+func (g Gophers) Find(req requests.FindGopher) (responses.FindGopher, error) {
+	gopher, exists := g.burrow[req.ID]
+	if !exists {
+		return responses.FindGopher{}, errors.New("Not found.")
+	}
+
+	return gopher.ToFindGopher()
+}
+
+func (g Gophers) FindAll(req requests.FindGopher) ([]responses.FindGopher, error) {
+	var resps []responses.FindGopher
+	for _, gopher := range g.burrow {
+		fg, err := gopher.ToFindGopher()
+		if err != nil {
+			return []responses.FindGopher{}, err
+		}
+		resps = append(resps, fg)
+	}
+	return resps, nil
+}
+
+// Create creates a gopher.
+func (g Gophers) Create(req requests.CreateGopher) (responses.CreateGopher, error) {
+	var gopher entities.Gopher
+	if err := gopher.Validate(req); err != nil {
+		return responses.CreateGopher{}, err
+	}
+
+	gopher.ID = g.getFreeKey()
+	gopher.Name = req.Name
+	gopher.Age = req.Age
+	g.burrow[gopher.ID] = gopher
+
+	return responses.CreateGopher{ID: gopher.ID}, nil
+}
+```
+
+As one can see, the interactor is completely oblivious to the incoming format. The relation to web applications is obvious: we are, after all, talking about requests and responses, and the DTOs translate very easily to JSON objects. But they can be used without JSON, in fact, the whole point is that even a GUI application will pass the same objects around.
+
+The interactors (and by extension, entities) are completely oblivious to their environment: they don't care whether they are running inside a GUI application, a system-level daemon, or a web server.
+
+## Conclusion
+
+The above architecture is suited for any language and **any use case**. One only needs an ability to define abstractions, were they type classes, interfaces, OCaml modules, Rust traits, or Clojure protocols.
+
+The arrows in this architecture tend to point inwards. Only the middle layer (the service layer) is seen by both the Core and the API layer is because it describes the language of the system, but none of its functionality.
+
+Keeping the arrows unidirectional will make the system more robust and scalable. If you decide to port your GUI app to a web service the interactors will stay the same.
+
+Moreover, unit testing is easy: you can mock *anything*, and what is more, the unit tests will be fast and simple. Entities will only test their internal business logic, interactors will not fumble with web services, the API will only deal with handling requests and responses and calling the right interactor, the host layer will contain system-specific tests (e.g. HTTP tests), but **all** of these components can be tested separately in a horizontal fashion.
