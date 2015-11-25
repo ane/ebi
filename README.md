@@ -290,6 +290,20 @@ As one can see, the interactor is completely oblivious to the incoming format. T
 
 The interactors (and by extension, entities) are completely oblivious to their environment: they don't care whether they are running inside a GUI application, a system-level daemon, or a web server.
 
+#### Talking to the external world
+
+If an interactor needs to talk to another component, e.g., a database, the same methodology applies. You define a database *boundary* and then the database interactor implements that. As a result, the interactor doesn't have a compile-time dependency on any database, only the boundary. 
+
+Similarly, if you're building a GUI application and want to use events, the interactor can push events to an event broker boundary, or the mechanism can be shifted a layer above to the API layer, which sits on top of multiple interactors. 
+
+## The API layer
+
+TODO
+
+## Finishing the chain: the host
+
+TODO
+
 ## Conclusion
 
 The above architecture is suited for any language and **any use case**. One only needs an ability to define abstractions, were they type classes, interfaces, OCaml modules, Rust traits, or Clojure protocols.
