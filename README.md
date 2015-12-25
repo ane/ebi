@@ -392,7 +392,7 @@ service, retainining its book modification logic, now overlaps with the `Book` s
 solution to this is to lift this logic from the `Author` interactor to the `Book` interactor, making
 the layout look like this.
 
-!(a problem)[./images/book-author-problem.png]
+![a problem](./images/book-author-problem.png)
 
 **TODO: figure this shit out! what exactly is the purpose**
 
