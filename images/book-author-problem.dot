@@ -20,8 +20,8 @@ digraph {
         BookInteractor;
     }
     
-    CatalogueAPI -> IAuthorService;
-    CatalogueAPI -> IBookService;
+    CatalogueAPI -> IAuthorService[label="depends",arrowhead=vee,style=dashed];
+    CatalogueAPI -> IBookService[label="depends",arrowhead=vee,style=dashed];
     AuthorInteractor -> IAuthorService[label="implements",arrowhead=empty];
     BookInteractor -> IBookService[label="implements",arrowhead=empty];
     AuthorInteractor -> IBookService[label="depends",color=blue,arrowhead=vee,style=dashed];
