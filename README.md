@@ -97,10 +97,8 @@ layers. These layers correspond to namespaces or packages in your language of ch
   * **Interactors** which implement boundaries and form the core business logic of the application
   * **Entities** which represent the data models of the program
 
-Thus, when a program is constructed, the API is given 
-
-* A set of boundaries it needs to talk to
-* A set of interactors that implement these functionalities
+Thus, when a program is constructed, the API is built top-down using dependency injection. The
+**Host** layer is the one doing the DI of the concrete interactors.
 
 And that's it. The interactors do not know what protocol its requests come from or are sent to, and
 the API doesn't know what sort of an interactor implements the service boundary.
@@ -393,6 +391,7 @@ solution to this is to lift this logic from the `Author` interactor to the `Book
 the layout look like this.
 
 ![a problem](./images/book-author-problem.png)
+*Could the blue arrow be removed, and contained inside the arrows from the API*
 
 The blue dashed arrow can be lifted into the API layer with little extra work. It's a good idea to
 push such arrows as far "up" as possible, because this helps keep one thing in check: not violating
@@ -404,14 +403,27 @@ In the above example this process would not be violated if there was no Book ser
 book-related logic was underneath the Author interactor. But, as soon as you start sharing
 responsibilities, and they start to overlap, you will run into problems.
 
-Hence, the API layer is there to provide additional logic that ties two interactors together. 
+Hence, the API layer is there to provide additional logic that ties two interactors together. You
+could think of it as a *meta-interactor*, something that operates on interactors only, but contains
+no low-level business logic.
 
-**TODO: figure this shit out! what exactly is the purpose**
+What is more, the API layer usually has some knowledge of the application domain: while interactors
+deal with dumb objects (DTOs), the API may be dealing with HTTP request objects. Thus, the API is
+closer to the actual implementation.
 
-The key differences between an API and an interactor are the following:
+Consequently, the **Core** layer is the unduplicated, non-overlapping part of the application: you
+may have multiple APIs for the same set of interactors, and multiple *hosts* for each API, but at
+the fundamental level, there's only one canonical implementation of the core.
+
+To conclude, the key differences between an API and an interactor are the following:
 
 * An API is domain-specific and knows about the target implementation. The API knows it is talking
-to a web server. It just doesn't know *which kind* of web server it is talking to.
+to a web server. It just doesn't know *which kind* of web server it is talking to, acting as a
+bridge between interactors and the delivery mechanism.
+* The API layer may tie a multitude of interactors together, without making them dependent on each
+  other, enforcing loose coupling.
+* APIs can be seen as "meta-interactors", operating on interactors the same way interactors operate
+  on entities.
 
 ## Finishing the chain: the host
 
@@ -421,7 +433,10 @@ TODO
 
 The above architecture is suited for any language and **any use case**. One only needs an ability to
 define abstractions, were they type classes, interfaces, OCaml modules, Rust traits, or Clojure
-protocols.
+protocols. Static typing is not required here: you just need *one* way of creating clear and
+verifiable functionality definitions. In dynamically typed languages like Clojure and Elixir you can
+use protocols (with runtime assertions), or even just plain old documentation. The boundary layer
+needs only to be *specified*, it's not a strict language requirement.
 
 The arrows in this architecture tend to point inwards. Only the middle layer (the service layer) is
 seen by both the Core and the API layer is because it describes the language of the system, but none
