@@ -394,6 +394,18 @@ the layout look like this.
 
 ![a problem](./images/book-author-problem.png)
 
+The blue dashed arrow can be lifted into the API layer with little extra work. It's a good idea to
+push such arrows as far "up" as possible, because this helps keep one thing in check: not violating
+the **single responsibility principle**, which roughly means that your interactor should do one
+thing and **one thing only**. So the Author interactor should only care about author logic,
+and the Book interactor should care only about book issues.
+
+In the above example this process would not be violated if there was no Book service, such that
+book-related logic was underneath the Author interactor. But, as soon as you start sharing
+responsibilities, and they start to overlap, you will run into problems.
+
+Hence, the API layer is there to provide additional logic that ties two interactors together. 
+
 **TODO: figure this shit out! what exactly is the purpose**
 
 The key differences between an API and an interactor are the following:
