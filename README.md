@@ -382,8 +382,17 @@ publications. You receive the new author name as input, and then you must update
 and their book catalogue in one go.
 
 Sure, sounds easy, just create a `ModifyCatalogue` functionality into the `Author` interactor. The
-interactor, in this case, would modify the author's name, then loop over its `Book`s and modify then
-individually, and finally send the updates to a database.
+interactor, in this case, would modify the author's name, then loop over its `Book`s and modify them
+individually, finally sending the updates to a database. This system works as long as the `Book`
+entities are under the sole ownership of an `Author`--that is, there is no way of adding, creating,
+deleting, or modifying a book from outside.
+
+As soon as you introduce a `Book` interactor into the mix, things start to get hairy. The `Author`
+service, retainining its book modification logic, now overlaps with the `Book` service. The imminent
+solution to this is to lift this logic from the `Author` interactor to the `Book` interactor, making
+the layout look like this.
+
+![a problem][./images/book-author-problem.png]
 
 **TODO: figure this shit out! what exactly is the purpose**
 
