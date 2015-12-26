@@ -1,11 +1,11 @@
-Entity--Boundary--Interactor
+Entity—Boundary—Interactor
 ----------------------------
 
 A modern application architecture
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This repository contains implementation examples of the
-**Entity-Boundary-Interactor** (**EBI**) application architecture as
+**Entity—Boundary—Interactor** (**EBI**) application architecture as
 presented by Uncle Bob in his series of talks titled `Architecture: The
 Lost Years <https://www.youtube.com/watch?v=HhNIttd87xs>`__ and `his
 book <http://www.amazon.com/Software-Development-Principles-Patterns-Practices/dp/0135974445/ref=asap_bc?ie=UTF8>`__.
@@ -25,7 +25,7 @@ synonymous are **EBC** where *C* stands for **Controller**.
 Examples of how to implement the architecture are given in this document
 and are written in Go.
 
-.. contents:: :local:
+.. contents:: Contents
 
 Goals & Motivation
 ------------------
@@ -50,12 +50,12 @@ layers, this architecture and many like it aren't dependent on
 presentation models or platforms.
 
 Glossary
-========
+--------
 
 .. figure:: docs/images/overview.png
-   :alt: An illustration
+   :alt: An overview of all the logical units of the architecture.
 
-   An illustration
+   An overview of all the logical units of the architecture.
 
 The architecture can be approached from two different perspectives. The
 first is the dependency graph, as you can see above. The second is the
@@ -84,15 +84,18 @@ architecture consists of three different components.
    and response models called **DTOs**, data transfer objects.
    Interactors are **concrete** implementations of boundaries.
 
-|API| *What the object diagram of the program looks like.*
+.. figure:: docs/images/boundary.png
+   :alt: An object diagram of the program.
+
+   An object diagram of the program.
 
 Request and Response Life-cycle for Interactors
-===============================================
+-----------------------------------------------
 
 .. figure:: docs/images/lifecycle.png
-   :alt: Request life-cycle
+   :alt: The request life-cycle of incoming requests and responses.
 
-   Request life-cycle
+   The request life-cycle of incoming requests and responses.
 
 A *request DTO* enters the application via the request boundary. This is
 usually the API layer sitting on top of some interactor. In the pictured
@@ -111,12 +114,13 @@ interactor doesn't know anything about the protocol or its environment.
 What does a program using this architecture look like?
 
 Module Hierarchy
-================
+----------------
 
 .. figure:: docs/images/hierarchy.png
    :alt: Organization
 
-   Organization
+   The code-level organization of modules. Each vertical section is an
+   separate module of the program.
 
 Furthermore, it is good practice to separate the EBI architecture itself
 into five different layers. These layers correspond to namespaces or
