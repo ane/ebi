@@ -390,8 +390,9 @@ service, retainining its book modification logic, now overlaps with the `Book` s
 solution to this is to lift this logic from the `Author` interactor to the `Book` interactor, making
 the layout look like this.
 
-![a problem](./images/book-author-problem.png)
-*Could the blue arrow be removed, and contained inside the arrows from the API*
+![a problem](./docs/images/book-author-problem.png)
+
+*Could the blue arrow be removed, and contained inside the arrows from the API?*
 
 The blue dashed arrow can be lifted into the API layer with little extra work. It's a good idea to
 push such arrows as far "up" as possible, because this helps keep one thing in check: not violating
