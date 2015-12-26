@@ -1,0 +1,31 @@
+digraph {
+    node[shape=record];
+    
+    subgraph cluster_User {
+        label="World"
+        A[label="HTTP Request"];
+        E[label="HTTP Response"]
+    }
+
+    subgraph cluster_Host {
+        label="Host"
+        B[label="Web Server"];
+    }
+
+    subgraph cluster_API {
+        label="API"
+        C[label="Web API"];
+        
+    }
+
+    subgraph cluster_Core {
+        label="Core"
+        D[label="Interactor"];
+    }
+
+    A -> B:w[label="read raw input"];
+    B:e -> C:w[label="convert to an object"];
+    C:e -> D:w[label="deserialize body & call interactor"];
+    D:e -> E[label="return response"];
+    
+}

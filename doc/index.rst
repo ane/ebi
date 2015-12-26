@@ -1,15 +1,14 @@
-:tocdepth: 3
-           
 Entity—Boundary—Interactor
 ==========================
 
 .. rubric:: A modern application architecture
 
-This repository contains implementation examples of the
-**Entity—Boundary—Interactor** (**EBI**) application architecture as
-presented by Uncle Bob in his series of talks titled `Architecture: The
-Lost Years <https://www.youtube.com/watch?v=HhNIttd87xs>`__ and `his
-book <http://www.amazon.com/Software-Development-Principles-Patterns-Practices/dp/0135974445/ref=asap_bc?ie=UTF8>`__.
+This repository contains a description and an example implementation
+examples of the **Entity—Boundary—Interactor** (**EBI**) application
+architecture, derived from ideas initially conceived by Uncle Bob in
+his series of talks titled `Architecture: The Lost Years
+<https://www.youtube.com/watch?v=HhNIttd87xs>`__ and `his book
+<http://www.amazon.com/Software-Development-Principles-Patterns-Practices/dp/0135974445/ref=asap_bc?ie=UTF8>`__.
 
 The EBI architecture is a modern application architecture suited for a
 wide range of application styles. It is especially suitable for web
@@ -24,23 +23,41 @@ where this architecture is studied in depth. Names that are common or
 synonymous are **EBC** where *C* stands for **Controller**.
 
 Examples of how to implement the architecture are given in this document
-and are written in Elixir.
+and are written in *Elixir*, a dynamically typed language with a simple
+and powerful syntax.
+
+.. warning::
+
+   This is still very much a work in progress. Contributions are
+   welcome on `Github <https://github.com/ane/ebi>`_.
 
 Table of Contents
 -----------------
 
 .. toctree::
-   :maxdepth: 2
+   :caption: Entity–Boundary–Interactor
 
-   self
    introduction
-   description
-   implementation
+   design
+   architecture
+   lifecycles
+   structuring
+   example
+
+.. toctree::
+   :caption: Layers
+
+   overview
+   service
+   core
+   api
+   external
+   host
+
+.. toctree::
+   :caption: Reference
+
    conclusion
-
-Index & Search
---------------
-
-- :ref:`search`
-
+   faq
+   
 
