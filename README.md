@@ -1,4 +1,4 @@
-## Entity&ndash;Boundary&ndash;Interactor
+## Entity--Boundary--Interactor
 
 ### A modern application architecture
 
@@ -24,7 +24,7 @@ Examples of how to implement the architecture are given in this document and are
 > "The architecture of something screams the intent." &mdash;Robert C. Martin
 
 As Martin points out, a lot of the times when looking at web applications you see library and
-tooling extrusions, but the *purpose* of the program is opaque.
+tooling artifacts, but the *purpose* of the program is opaque.
 
 > "The architecture of an application is driven by its use cases." &mdash;Ivar Jacobsen
 
@@ -39,7 +39,7 @@ and many like it aren't dependent on presentation models or platforms.
 
 ![An illustration](docs/images/overview.png)
 
-The architecture can be approached from two different perspectives. The first is the depedency
+The architecture can be approached from two different perspectives. The first is the dependency
 graph, as you can see above. The second is the hierarchy graph, which presents a concrete separation
 in a program.
 
@@ -66,9 +66,9 @@ All the application agnostic business rules should be located in the entities.
 ![API](docs/images/boundary.png)
 *What the object diagram of the program looks like.*
 
-# Request and Response Lifecycle for Interactors
+# Request and Response Life-cycle for Interactors
 
-![Request lifecycle](docs/images/lifecycle.png)
+![Request life-cycle](docs/images/lifecycle.png)
 
 A *request DTO* enters the application via the request boundary. This is usually the API layer
 sitting on top of some interactor. In the pictured example, we have a `GetGopher` interactor whose
@@ -194,7 +194,7 @@ means that in Go, it is entirely valid to define a function `func Foo(c Creator)
 `FinderCreatorRemoverUpdater` to it as a parameter. In Java or its family you can't decompose
 multiple inheriting classes or interfaces into their constituent interfaces.
 
-The takeaway points of boundary design are these:
+The take-away points of boundary design are these:
 
 1. Make loose coupling easy by defining abstract interfaces that aren't too monolithic.
 2. Decompose if you can if your interfaces are too big, think about splitting them into modular
@@ -352,7 +352,47 @@ The interactors (and by extension, entities) are completely oblivious to their e
 don't care whether they are running inside a GUI application, a system-level daemon, or a web
 server.
 
-## Talking to the External World
+### Beware of Behemoth Interactors
+
+Interactors are business logic units. How much business logic is too much business logic? The best
+rule of thumb is the **single responsibility principle**: an interactor should only do one thing,
+and one thing only. I'm also going to address this [below](#the-api-layer), but the most important
+thing to understand about interactors is that they should operate only one *one* aspect of the
+business logic.
+
+What this means may not be immediately clear. If you are building a REST API, you will generally
+have some separation of concerns already going on at the external API level, in the form of
+URIs. To use a book catalogue as an ad hoc example, you could have a URI for book authors at
+`/authors` and `/books`, these clearly indicate---to the API user, anyway---what lies beneath.
+
+At the code level, this distinction must be maintained. An author may contain a collection of books
+they have, but whose responsibility is modifying them? Obviously, since we have two URIs here, one
+for books, one for authors, we must decide which one handles the logic of modifying book
+entities. In this case, any internal *modification logic* of the book entities must reside
+underneath a **single** interactor. There can be two cases here:
+
+* **One interactor does everything**. The `/books` URI is just an alias underneath the Author
+  interactor, or vice versa. 
+    * **Pros**: no overlap in logic, no conflicts, since everything is contained under one unit (a
+      single interactor).
+    * **Cons**: must be split eventually, since otherwise it will grow to monstrous proportions.
+* **Two interactors, `AuthorInteractor` and `BookInteractor`**. The `AuthorInteractor` calls methods
+  of the `IBookService` (which `BookInteractor` implements) to modify the `Book` entities contained
+  (or *owned*) by an `Author` entity.
+    * **Pros**: no chance of overlap since the responsibilities are split. 
+    * **Cons**: risk of introducing circular dependencies between boundaries (see [below](#the-api-layer)).
+
+If you're building a really simple service, you don't *have* to split interactor duties, but it's a
+good idea. Be careful of choosing short-term practicality in favor of long-term abstractions, it
+may bite you in the rear one day!
+
+As a summary, in the presented example, the `AuthorInteractor` should only modify things related to
+`Author`s, and preferably only *read* data about `Book`s, leaving modification and updates to the
+`BookInteractor`. There are two ways on how to implement the necessary communication, that is, how
+the `AuthorInteractor` calls the `BookInteractor`, and this will be resolved later, but now we have
+a small interlude about something equally vital: the external world.
+
+### Talking to the External World
 
 One part I haven't yet addressed in this overview is how to talk to external dependencies, like a
 database. The answer is remarkably simple: create them behind a boundary and build them like an
@@ -386,7 +426,7 @@ entities are under the sole ownership of an `Author`--that is, there is no way o
 deleting, or modifying a book from outside.
 
 As soon as you introduce a `Book` interactor into the mix, things start to get hairy. The `Author`
-service, retainining its book modification logic, now overlaps with the `Book` service. The imminent
+service, retaining its book modification logic, now overlaps with the `Book` service. The imminent
 solution to this is to lift this logic from the `Author` interactor to the `Book` interactor, making
 the layout look like this.
 
@@ -412,7 +452,7 @@ What is more, the API layer usually has some knowledge of the application domain
 deal with dumb objects (DTOs), the API may be dealing with HTTP request objects. Thus, the API is
 closer to the actual implementation.
 
-Consequently, the **Core** layer is the unduplicated, non-overlapping part of the application: you
+Consequently, the **Core** layer is the non-duplicated, non-overlapping part of the application: you
 may have multiple APIs for the same set of interactors, and multiple *hosts* for each API, but at
 the fundamental level, there's only one canonical implementation of the core.
 
