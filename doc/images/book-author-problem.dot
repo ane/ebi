@@ -1,0 +1,28 @@
+digraph {
+    node[shape=record]
+    edge[arrowhead=empty]
+    newrank=true;
+    {rank=same CatalogueAPI IAuthorService AuthorInteractor}
+    {rank=same IBookService BookInteractor}
+
+    subgraph cluster_API {
+        label="API layer";
+        CatalogueAPI[];
+    }
+    subgraph cluster_Service {
+        label="Service layer";
+        IAuthorService[label="{AuthorService|update(Id : int)\l}"];
+        IBookService[label="{BookService|update(Id : int)\l}"];
+    }
+    subgraph cluster_Core {
+        label="Core layer";
+        AuthorInteractor;
+        BookInteractor;
+    }
+    
+    CatalogueAPI -> IAuthorService[label="depends",arrowhead=vee,style=dashed];
+    CatalogueAPI -> IBookService[label="depends",arrowhead=vee,style=dashed];
+    AuthorInteractor -> IAuthorService[label="implements",arrowhead=empty];
+    BookInteractor -> IBookService[label="implements",arrowhead=empty];
+    AuthorInteractor -> IBookService[label="depends",color=blue,arrowhead=vee,style=dashed];
+}
