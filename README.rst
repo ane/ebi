@@ -1,8 +1,7 @@
 Entity—Boundary—Interactor
-----------------------------
+==========================
 
-A modern application architecture
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. rubric:: A modern application architecture
 
 This repository contains implementation examples of the
 **Entity—Boundary—Interactor** (**EBI**) application architecture as
@@ -17,7 +16,7 @@ agnostic architecture, it is not tied to a specific platform,
 application, language or framework. It is a way to design programs, not
 a library.
 
-The name **Entity–Boundary–Interactor** originates from `a master's
+The name **Entity–Boundary—Interactor** originates from `a master's
 thesis <https://jyx.jyu.fi/dspace/bitstream/handle/123456789/41024/URN:NBN:fi:jyu-201303071297.pdf?sequence=1>`__
 where this architecture is studied in depth. Names that are common or
 synonymous are **EBC** where *C* stands for **Controller**.
@@ -25,20 +24,29 @@ synonymous are **EBC** where *C* stands for **Controller**.
 Examples of how to implement the architecture are given in this document
 and are written in Go.
 
-.. contents:: Contents
+.. contents:: :depth: 2
 
-Goals & Motivation
-------------------
+Introduction
+------------
 
-    "The architecture of something screams the intent." —Robert C.
-    Martin
+.. epigraph::
+
+    The architecture of something *screams* the intent.
+
+    -- Robert C. Martin
 
 As Martin points out, a lot of the times when looking at web
 applications you see library and tooling artifacts, but the *purpose* of
-the program is opaque.
+the program is opaque. You open up a repository of a web application
+and what you see is a load of configuration files, complicated
+directory structures and lots of extraneous cruft that one day become
+invisible. Could this opacity be avoided?
 
-    "The architecture of an application is driven by its use cases."
-    —Ivar Jacobsen
+.. epigraph::
+
+    The architecture of an application is driven by its use cases.
+
+    -- Ivar Jacobsen
 
 The idea is to design programs so that their architectures immediately
 present their use case. EBI is a way to do that. It's a way to design
@@ -47,7 +55,14 @@ uses loose coupling to remain extensible.
 
 Ultimately, the goal is the *separation of concerns* between application
 layers, this architecture and many like it aren't dependent on
-presentation models or platforms.
+presentation models or platforms. All the arrows, or dependencies,
+point inwards in the abstraction chain, each successive layer is
+less abstract than the one before it.
+
+Keeping the arrows pointing inwards makes the code easy to maintain,
+extend, test and refactor. EBI imposes some architectural requirements
+on the programmers, that is, you must navigate around its rules, but
+this is kept at a minimum.
 
 Glossary
 --------
@@ -89,6 +104,9 @@ architecture consists of three different components.
 
    An object diagram of the program.
 
+Description
+===========
+
 Request and Response Life-cycle for Interactors
 -----------------------------------------------
 
@@ -113,8 +131,8 @@ interactor doesn't know anything about the protocol or its environment.
 
 What does a program using this architecture look like?
 
-Module Hierarchy
-----------------
+Layer Hierarchy
+---------------
 
 .. figure:: docs/images/hierarchy.png
    :alt: Organization
@@ -146,16 +164,43 @@ And that's it. The interactors do not know what protocol its requests
 come from or are sent to, and the API doesn't know what sort of an
 interactor implements the service boundary.
 
-Example SOA implementation in Go
---------------------------------
+Example Implementation: A REST API in in Elixir
+-----------------------------------------------
 
-Using the above list, the application can be structured as follows.
+This document features a small example implementation of this
+architecture in *Elixir*. Elixir is a dynamically typed language
+leveraging the Erlang virtual machine.
+
+I chose Elixir because of its simple but powerful syntax. I originally
+wanted to implement this in Ruby but I wanted clear examples of
+*interfaces* and Ruby doesn't really have them. Thankfully, Elixir has
+*protocols*, which let me write the boundary descriptions using a
+high-level abstraction.
+
+.. tip:: Interfaces aren't absolutely necessary.
+
+   You don't really *need* interfaces to implement boundaries, it just
+   makes it easier to browse. For Ruby and Python you could easily
+   write a dummy abstract class with ``NoMethodImplementation``
+   exceptions being thrown left and right, in case of an unsatisfied boundary.
+
+The Elixir implementation makes the use of the `Spirit
+<https://github.com/citrusbyte/spirit>`_ microframework for
+Elixir. Equivalent frameworks in other applications:
+
+- **Ruby**: Sinatra, Cuba
+- **JavaScript**: Express
+- **Go**: net/http
+- **C#**: ServiceStack
+- **Java**: SparkJava
+
+...and so on.
 
 ::
 
     .
     ├── api
-    │   └── gopher.go
+    │   └── web.ex
     ├── core
     │   ├── entities
     │   │   ├── entity.go
@@ -174,7 +219,12 @@ Using the above list, the application can be structured as follows.
         └── gophers.go
 
 Implementation
---------------
+==============
+
+From the directory tree one can see that the code is organized into
+separate namespaces. In the example implementation this is achieved by
+splitting the code into different folders, since this is a one-to-one
+mapping to packages (namespaces) in the Go programming language.
 
 The ``api`` folder contains the API, the ``host`` web servers or GUI
 apps, the ``service`` contains the boundary layer with the request and
@@ -186,26 +236,12 @@ looking at it. By exploring the ``service`` directory (containing
 ``gophers.go`` *et al.*) we can immediately see the services this
 program provides.
 
-Service layer
-~~~~~~~~~~~~~
+The Service Layer
+-----------------
 
 The common language spoken by the boundaries and interactors are
 requests and responses. Both interfaces are defined in ``service.go``.
 
-.. code:: go
-
-    package service
-
-    // Request is a request to any service.
-    type Request interface{}
-
-    // Response is a response to a request.
-    type Response interface{}
-
-These are empty interfaces. As a result, in Go, any type implements this
-interface, so this is just naming sugar for now, as logic can be added
-into these interfaces later when this architecture spec develops
-further.
 
 We can now implement the Gophers service (which finds and stores
 gophers) in ``service/gophers.go``.
@@ -227,7 +263,7 @@ gophers) in ``service/gophers.go``.
     }
 
 Boundary complexity
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~
 
 The above code presented a rather simple boundary, composed of just two
 methods. This is obviously suitable for a simple web application, but
@@ -238,9 +274,11 @@ other.
 When writing boundaries, there aren't any limits to their complexities.
 They can contain just one method or a dozen method.
 
-In Go, it is idiomatic to aim for interface composition. The ``Gophers``
-boundary above is composed of two distinct interfaces. This allows for
-extensibility.
+.. tip::
+   
+   In Go, it is idiomatic to aim for interface composition. The ``Gophers``
+   boundary above is composed of two distinct interfaces. This allows for
+   extensibility.
 
 Though similar to multiple inheritance, Go interfaces allow for
 decomposition. In Java you could define a class
@@ -325,8 +363,8 @@ an abstract boundary. They use DTOs (data transfer objects), simple
 structures of data, for communication. We now move on to the core layer
 of the architecture.
 
-Core layer
-~~~~~~~~~~
+The Core Layer
+--------------
 
 The core layer contains actual business logic. First we start off with
 the entity, the rich business objects of the application. In
@@ -355,7 +393,7 @@ about other gophers, more importantly, *it doesn't know about the
 interactor*.
 
 Interactors
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 Interactors contain rich business logic. They can manipulate entities
 and they implement boundaries. Here, we have the ``Gophers`` boundary
@@ -427,7 +465,7 @@ their environment: they don't care whether they are running inside a GUI
 application, a system-level daemon, or a web server.
 
 Beware of Behemoth Interactors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Interactors are business logic units. How much business logic is too
 much business logic? The best rule of thumb is the **single
@@ -534,10 +572,8 @@ the ``Book`` interactor, making the layout look like this.
 .. figure:: ./docs/images/book-author-problem.png
    :alt: a problem
 
-   a problem
-
-*Could the blue arrow be removed, and contained inside the arrows from
-the API?*
+   Could the blue arrow be removed, and contained inside the arrows
+   from the API layer pointing towards the Service layer?
 
 The blue dashed arrow can be lifted into the API layer with little extra
 work. It's a good idea to push such arrows as far "up" as possible,
@@ -579,13 +615,13 @@ the following:
 -  APIs can be seen as "meta-interactors", operating on interactors the
    same way interactors operate on entities.
 
-Finishing the chain: the host
------------------------------
+The Host Layer
+--------------
 
 TODO
 
 Conclusion
-----------
+==========
 
 The above architecture is suited for any language and **any use case**.
 One only needs an ability to define abstractions, were they type
