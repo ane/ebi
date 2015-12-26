@@ -177,7 +177,7 @@ wanted to implement this in Ruby but I wanted clear examples of
 *protocols*, which let me write the boundary descriptions using a
 high-level abstraction.
 
-.. tip:: Interfaces aren't absolutely necessary.
+.. note:: Interfaces aren't absolutely necessary.
 
    You don't really *need* interfaces to implement boundaries, it just
    makes it easier to browse. For Ruby and Python you could easily
