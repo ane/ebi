@@ -1,6 +1,11 @@
 digraph {
     node[shape=record];
-    
+    newrank=true;
+    {rank=1 A E}
+    {rank=2 B F}
+    {rank=3 C G}
+    {rank=4 D H}
+
     subgraph cluster_User {
         label="World"
         A[label="HTTP Request"];
@@ -15,7 +20,6 @@ digraph {
     subgraph cluster_API {
         label="API"
         C[label="Web API"];
-        
     }
 
     subgraph cluster_Core {
@@ -23,9 +27,29 @@ digraph {
         D[label="Interactor"];
     }
 
-    A -> B:w[label="read raw input"];
-    B:e -> C:w[label="convert to an object"];
-    C:e -> D:w[label="deserialize body & call interactor"];
-    D:e -> E[label="return response"];
-    
+    subgraph cluster_Host2 {
+        label="Host"
+        F[label="Web Server"];
+    }
+
+    subgraph cluster_API2 {
+        label="API"
+        G[label="Web API"];
+        
+    }
+
+    subgraph cluster_Core2 {
+        label="Core"
+        H[label="Interactor"];
+    }
+
+    A -> B[label="read raw input"];
+    B -> C[label="convert to an object"];
+    C -> D[label="send request DTO"];
+
+    H -> G;
+    G -> F;
+    F -> E;
+
+    D -> H;
 }

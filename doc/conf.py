@@ -33,12 +33,13 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
 ]
-
+from recommonmark.parser import CommonMarkParser
+source_parsers = {'.md': CommonMarkParser}
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -105,7 +106,19 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 # -- Options for HTML output ----------------------------------------------
+#import alabaster
 
+#html_theme_path = [alabaster.get_path()]
+#extensions = ['alabaster']
+#html_theme = 'alabaster'
+#html_sidebars = {
+#    '**': [
+#        'about.html',
+#        'navigation.html',
+#        'relations.html',
+#        'searchbox.html',
+#    ]
+#}
 import sphinx_rtd_theme
 
 html_theme = "sphinx_rtd_theme"
@@ -119,9 +132,6 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # further.  For a list of options available for each theme, see the
 # documentation.
 # Add any paths that contain custom themes here, relative to this directory.
-display_github = True
-github_user = "perse"
-github_repo = "ebi"
 #html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to

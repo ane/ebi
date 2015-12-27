@@ -1,5 +1,5 @@
-The API layer
-=============
+The Presentation Layer
+======================
 
 The introduction of the API layer at this point may seem a bit
 heavy-handed. Why not map the interactor methods directly to routes? I

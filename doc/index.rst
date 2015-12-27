@@ -31,33 +31,38 @@ and powerful syntax.
    This is still very much a work in progress. Contributions are
    welcome on `Github <https://github.com/ane/ebi>`_.
 
-Table of Contents
------------------
-
 .. toctree::
    :caption: Entity–Boundary–Interactor
 
    introduction
    design
    architecture
-   lifecycles
    structuring
-   example
+   lifecycles
 
 .. toctree::
    :caption: Layers
 
    overview
-   service
+   presentation
+   boundary
    core
-   api
+
+.. toctree::
+   :caption: In Practice
+
    external
-   host
+
+.. toctree::
+   :caption: Examples
+
+   A REST API <example>
 
 .. toctree::
    :caption: Reference
 
-   conclusion
+   about
+   license
    faq
    
 
