@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; Entity–Boundary–Interactor 0.1.0-alpha documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Entity–Boundary–Interactor 0.1.0-alpha documentation" href="index.html"/>
+        <link rel="next" title="Design Goals" href="design.html"/>
+        <link rel="prev" title="Entity—Boundary—Interactor" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Entity–Boundary–Interactor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Entity–Boundary–Interactor</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-does-this-archtecture-differ-from-mvc">How does this archtecture differ from MVC?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design Goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">The Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structuring.html">Structuring Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lifecycles.html">Event Lifecycles</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Layers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="presentation.html">The Presentation Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">The Boundary Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">The Core Layer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">In Practice</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="external.html">Talking to the External World</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="example.html">A REST API</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Entity–Boundary–Interactor</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<blockquote class="epigraph">
+<div><p>The architecture of something <em>screams</em> the intent.</p>
+<p class="attribution">&mdash;Robert C. Martin</p>
+</div></blockquote>
+<p>Often when looking at the code of web applications, you are greeted
+with a mass of folders, library installation, and tooling
+configurations. The code is structured haphazardly into nondescriptive
+folders like <code class="docutils literal"><span class="pre">app</span></code>, and the dependency layout of the application is
+a jungle.</p>
+<p>As a result, the purpose and architecture of the program become
+opaque.</p>
+<blockquote class="epigraph">
+<div><p>The architecture of an application is driven by its use cases.</p>
+<p class="attribution">&mdash;Ivar Jacobsen</p>
+</div></blockquote>
+<p>The idea is to design programs so that their architectures immediately
+present their use case. It&#8217;s a way to design programs so that its
+internal dependency graph is organized cleanly and its elements are
+joined together with as loose coupling as possible.</p>
+<p>Ultimately, the goal is the <em>separation of concerns</em> between
+application layers, this architecture and many like it aren&#8217;t
+dependent on presentation models or platforms. All the arrows, or
+dependencies, point inwards in the abstraction chain, each successive
+layer less abstract than the one before it.</p>
+<p>Keeping the arrows pointing inwards makes the code easy to maintain,
+extend, test and refactor. EBI imposes some architectural requirements
+on the programmers, that is, you must navigate around its rules, but
+this is kept at a minimum.</p>
+<div class="section" id="how-does-this-archtecture-differ-from-mvc">
+<h2>How does this archtecture differ from MVC?<a class="headerlink" href="#how-does-this-archtecture-differ-from-mvc" title="Permalink to this headline">¶</a></h2>
+<p>The difference between EBI and MVC is that an EBI architecture is
+that the business logic of the application is designed to be
+platform-agnostic of its delivery mechanism.</p>
+<p>To paraphrase, this means that the business logic parts, interactors and
+entities, do not know in which medium they&#8217;re being accessed from. It
+could be from a web server, a unit test, or a GUI application.</p>
+<p>Contrast this to MVC, where there is <em>always</em> a dependency on the
+delivery mechanism. No matter how hard you tried, you cannot tear
+Rails controllers out of the web world.</p>
+<p>What makes decoupling the business logic from the delivery mechanism a
+good thing? This is outlined in the next section, <a href="#id1"><span class="problematic" id="id2">`ref`:design:</span></a>.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="design.html" class="btn btn-neutral float-right" title="Design Goals" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Entity—Boundary—Interactor" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Antoine Kalmbach.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0-alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

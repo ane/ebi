@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The Core Layer &mdash; Entity–Boundary–Interactor 0.1.0-alpha documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Entity–Boundary–Interactor 0.1.0-alpha documentation" href="index.html"/>
+        <link rel="next" title="Talking to the External World" href="external.html"/>
+        <link rel="prev" title="The Boundary Layer" href="boundary.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Entity–Boundary–Interactor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Entity–Boundary–Interactor</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design Goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">The Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structuring.html">Structuring Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lifecycles.html">Event Lifecycles</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Layers</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="presentation.html">The Presentation Layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">The Boundary Layer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">The Core Layer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#entities">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interactors">Interactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#beware-of-behemoths">Beware of Behemoths</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">In Practice</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="external.html">Talking to the External World</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="example.html">A REST API</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Entity–Boundary–Interactor</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>The Core Layer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-core-layer">
+<h1>The Core Layer<a class="headerlink" href="#the-core-layer" title="Permalink to this headline">¶</a></h1>
+<p>The core layer contains actual business logic. First we start off with
+the entity, the rich business objects of the application. In
+<code class="docutils literal"><span class="pre">core/entities/entity.go</span></code>,</p>
+<div class="section" id="entities">
+<h2>Entities<a class="headerlink" href="#entities" title="Permalink to this headline">¶</a></h2>
+<div class="code go highlight-python"><div class="highlight"><pre>type Gopher struct {
+    Name string
+    Age int
+}
+</pre></div>
+</div>
+<p>Entities are completely invisible to the outside layers. Not any thing
+but the interactors know about them. Entities contain business logic,
+e.g., a <code class="docutils literal"><span class="pre">Gopher</span></code> entity can modify itself or contain functions related
+to it, but the distinction between entities and interactors is the
+following:</p>
+<ul class="simple">
+<li>entities modify <em>themselves</em> vs.</li>
+<li>interactors modify <em>entities</em></li>
+</ul>
+<p>An entity can contain other entities: a <code class="docutils literal"><span class="pre">Gopher</span></code>, could technically
+possess a <code class="docutils literal"><span class="pre">Tail</span></code> and two <code class="docutils literal"><span class="pre">Eye</span></code>s, and it can modify them at will.
+This hierarchy is strictly unidirectional: a <code class="docutils literal"><span class="pre">Gopher</span></code> doesn&#8217;t know
+about other gophers, more importantly, <em>it doesn&#8217;t know about the
+interactor</em>.</p>
+</div>
+<div class="section" id="interactors">
+<h2>Interactors<a class="headerlink" href="#interactors" title="Permalink to this headline">¶</a></h2>
+<p>Interactors contain rich business logic. They can manipulate entities
+and they implement boundaries. Here, we have the <code class="docutils literal"><span class="pre">Gophers</span></code> boundary
+from above to implement, so we implement a smallish interactor that
+implements it.</p>
+<div class="code go highlight-python"><div class="highlight"><pre>type Gophers struct {
+    burrow map[int]entities.Gopher
+}
+
+func NewGophers() *Gophers {
+    return &amp;Gophers{
+        burrow: make(map[int]entities.Gopher),
+    }
+}
+</pre></div>
+</div>
+<p>It implements the three methods as defined by the <code class="docutils literal"><span class="pre">Gophers</span></code> boundary</p>
+<div class="code go highlight-python"><div class="highlight"><pre>// Find finds a gopher from storage.
+func (g Gophers) Find(req requests.FindGopher) (responses.FindGopher, error) {
+    gopher, exists := g.burrow[req.ID]
+    if !exists {
+        return responses.FindGopher{}, errors.New(&quot;Not found.&quot;)
+    }
+
+    return gopher.ToFindGopher()
+}
+
+func (g Gophers) FindAll(req requests.FindGopher) ([]responses.FindGopher, error) {
+    var resps []responses.FindGopher
+    for _, gopher := range g.burrow {
+        fg, err := gopher.ToFindGopher()
+        if err != nil {
+            return []responses.FindGopher{}, err
+        }
+        resps = append(resps, fg)
+    }
+    return resps, nil
+}
+
+// Create creates a gopher.
+func (g Gophers) Create(req requests.CreateGopher) (responses.CreateGopher, error) {
+    var gopher entities.Gopher
+    if err := gopher.Validate(req); err != nil {
+        return responses.CreateGopher{}, err
+    }
+
+    gopher.ID = g.getFreeKey()
+    gopher.Name = req.Name
+    gopher.Age = req.Age
+    g.burrow[gopher.ID] = gopher
+
+    return responses.CreateGopher{ID: gopher.ID}, nil
+}
+</pre></div>
+</div>
+<p>As one can see, the interactor is completely unaware of any protocol
+dependencies. The relation to web applications is obvious: we are, after
+all, talking about requests and responses, and the DTOs translate very
+easily to JSON objects. But they can be used without JSON, in fact, the
+whole point is that even a GUI application will pass the same objects
+around.</p>
+<p>The interactors (and by extension, entities) are completely oblivious to
+their environment: they don&#8217;t care whether they are running inside a GUI
+application, a system-level daemon, or a web server.</p>
+</div>
+<div class="section" id="beware-of-behemoths">
+<h2>Beware of Behemoths<a class="headerlink" href="#beware-of-behemoths" title="Permalink to this headline">¶</a></h2>
+<p>Interactors are business logic units. How much business logic is too
+much business logic? The best rule of thumb is the <strong>single
+responsibility principle</strong>: an interactor should only do one thing, and
+one thing only. I&#8217;m also going to address this
+<a class="reference external" href="#the-api-layer">below</a>, but the most important thing to understand
+about interactors is that they should operate only one <em>one</em> aspect of
+the business logic.</p>
+<p>What this means may not be immediately clear. If you are building a REST
+API, you will generally have some separation of concerns already going
+on at the external API level, in the form of URIs. To use a book
+catalogue as an ad hoc example, you could have a URI for book authors at
+<code class="docutils literal"><span class="pre">/authors</span></code> and <code class="docutils literal"><span class="pre">/books</span></code>, these clearly indicate&#8212;to the API user,
+anyway&#8212;what lies beneath.</p>
+<p>At the code level, this distinction must be maintained. An author may
+contain a collection of books they have, but whose responsibility is
+modifying them? Obviously, since we have two URIs here, one for books,
+one for authors, we must decide which one handles the logic of modifying
+book entities. In this case, any internal <em>modification logic</em> of the
+book entities must reside underneath a <strong>single</strong> interactor. There can
+be two cases here:</p>
+<ul class="simple">
+<li><strong>One interactor does everything</strong>. The <code class="docutils literal"><span class="pre">/books</span></code> URI is just an
+alias underneath the Author interactor, or vice versa.<ul>
+<li><strong>Pros</strong>: no overlap in logic, no conflicts, since everything is
+contained under one unit (a single interactor).</li>
+<li><strong>Cons</strong>: must be split eventually, since otherwise it will grow
+to monstrous proportions.</li>
+</ul>
+</li>
+<li><strong>Two interactors, ``AuthorInteractor`` and ``BookInteractor``</strong>. The
+<code class="docutils literal"><span class="pre">AuthorInteractor</span></code> calls methods of the <code class="docutils literal"><span class="pre">IBookService</span></code> (which
+<code class="docutils literal"><span class="pre">BookInteractor</span></code> implements) to modify the <code class="docutils literal"><span class="pre">Book</span></code> entities
+contained (or <em>owned</em>) by an <code class="docutils literal"><span class="pre">Author</span></code> entity.<ul>
+<li><strong>Pros</strong>: no chance of overlap since the responsibilities are
+split.</li>
+<li><strong>Cons</strong>: risk of introducing circular dependencies between
+boundaries (see <a class="reference external" href="#the-api-layer">below</a>).</li>
+</ul>
+</li>
+</ul>
+<p>If you&#8217;re building a really simple service, you don&#8217;t <em>have</em> to split
+interactor duties, but it&#8217;s a good idea. Be careful of choosing
+short-term practicality in favor of long-term abstractions, it may bite
+you in the rear one day!</p>
+<p>As a summary, in the presented example, the <code class="docutils literal"><span class="pre">AuthorInteractor</span></code> should
+only modify things related to <code class="docutils literal"><span class="pre">Author</span></code>s, and preferably only <em>read</em>
+data about <code class="docutils literal"><span class="pre">Book</span></code>s, leaving modification and updates to the
+<code class="docutils literal"><span class="pre">BookInteractor</span></code>. There are two ways on how to implement the necessary
+communication, that is, how the <code class="docutils literal"><span class="pre">AuthorInteractor</span></code> calls the
+<code class="docutils literal"><span class="pre">BookInteractor</span></code>, and this will be resolved later, but now we have a
+small interlude about something equally vital: the external world.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="external.html" class="btn btn-neutral float-right" title="Talking to the External World" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="boundary.html" class="btn btn-neutral" title="The Boundary Layer" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Antoine Kalmbach.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0-alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
