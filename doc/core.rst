@@ -15,7 +15,7 @@ Entities
         Age int
     }
 
-Entities are completely invisible to the outside layers. Not any thing
+Entities are completely invisible to the outside layers. Nothing
 but the interactors know about them. Entities contain business logic,
 e.g., a ``Gopher`` entity can modify itself or contain functions related
 to it, but the distinction between entities and interactors is the
