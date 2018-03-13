@@ -12,7 +12,7 @@ business together, this seems like the right approach. Once you get too
 many, it gets useful to wrap them underneath a single unit.
 
 Suppose you have an API endpoint of a book catalogue, and you want to
-implement functionality that that modifies a particular author and at
+implement functionality that modifies a particular author and at
 the same time transfers these modifications to the publications. You
 receive the new author name as input, and then you must update the
 author itself and their book catalogue in one go.
