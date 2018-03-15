@@ -15,7 +15,7 @@ high-level abstraction.
 
 .. note:: Interfaces aren't absolutely necessary.
 
-   You don't really *need* interfaces to implement boundaries, the
+   You don't really *need* interfaces to implement boundaries. The
    language-level abstractions make it easier to understand in its own
    terms. Since no boundary object is an actual, concrete
    implementation, it quickly becomes obvious that the boundary
