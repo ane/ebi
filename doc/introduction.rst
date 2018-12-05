@@ -38,7 +38,7 @@ extend, test and refactor. EBI imposes some architectural requirements
 on the programmers, that is, you must navigate around its rules, but
 this is kept at a minimum.
 
-How does this archtecture differ from MVC?
+How does this architecture differ from MVC?
 ------------------------------------------
 
 The difference between EBI and MVC is that an EBI architecture is
